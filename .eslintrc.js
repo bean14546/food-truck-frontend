@@ -12,6 +12,21 @@ module.exports = {
   },
   rules: {
     'no-console': process.env.NODE_ENV === 'production' ? 'warn' : 'off',
-    'no-debugger': process.env.NODE_ENV === 'production' ? 'warn' : 'off'
+    'no-debugger': process.env.NODE_ENV === 'production' ? 'warn' : 'off',
+    'quotes': ['error', 'single'],
+    'indent': ['error', 2],
+    'semi': ['error', 'never'],
+    'keyword-spacing': ['error', { 'before': true, 'after': true }],
+    'space-before-function-paren': ['error', {
+      'anonymous': 'always',
+      'named': 'always',
+      'asyncArrow': 'always'
+    }],
+    'object-curly-spacing': ['error', 'always'],
+    'no-multi-spaces': 'error',
+    'no-trailing-spaces': 'error',
+    'space-before-blocks': 'error',
+    'func-call-spacing': ['error', 'never'],
+    'comma-dangle': ['error', { 'functions': 'never' }]
   }
 }
