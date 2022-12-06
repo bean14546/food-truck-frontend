@@ -72,14 +72,6 @@
 <script>
 export default {
   name: 'MenuCardComponent',
-  computed: {
-    colorVariable () {
-      return `--color: ${this.color}`
-    },
-    numberOfLines () {
-      return this.recommend ? '--line: 2' : '--line: 1'
-    }
-  },
   props: {
     recommend: {
       type: Boolean,
@@ -114,6 +106,14 @@ export default {
           updated_at: null
         }
       }
+    }
+  },
+  computed: {
+    colorVariable () {
+      return `--color: ${this.color}`
+    },
+    numberOfLines () {
+      return this.recommend ? '--line: 2' : '--line: 1'
     }
   }
 }

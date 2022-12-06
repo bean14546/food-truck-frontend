@@ -16,7 +16,7 @@
         dense
         filled
       >
-        <template #prepend-inner>
+        <template v-slot:prepend-inner>
           <v-icon color="primary">mdi-magnify</v-icon>
         </template>
         <template v-slot:selection="data">
@@ -69,14 +69,13 @@
           </span>
         </h3>
         <p class="grey--text font-weight-regular"> เมนูมาใหม่ แสนอร่อยพร้อมให้คุณมาลิ้มลอง </p>
-        <v-slide-group>
-          <v-slide-item
-            class="mb-2"
-            v-for="(item, index) in newFood" :key="index"
-          >
+        <sliderComponent
+          :items="newFood"
+        >
+          <template #item="{ item }">
             <menuCardComponent class="mr-4" :food="item" />
-          </v-slide-item>
-        </v-slide-group>
+          </template>
+        </sliderComponent>
       </div>
     </section>
   </div>
@@ -90,22 +89,20 @@ import sliderComponent from '@/components/slider.vue'
 // API
 import foodApi from '@/api/foodApi'
 import categoryApi from '@/api/categoryApi'
+// function
 export default {
   name: 'HomePage',
-  layout: 'FrontendLayout',
   components: {
     menuCardComponent,
     categoryCardComponent,
     sliderComponent
   },
+  layout: 'FrontendLayout',
   data () {
     return {
       food: [],
       category: []
     }
-  },
-  mounted () {
-    this.fetchData()
   },
   computed: {
     // กรองเอาแต่เมนูแนะนำจากเมนูทั้งหมด
@@ -116,6 +113,9 @@ export default {
     newFood () {
       return this.food.filter(item => item.Food_Status.map(item => item.id).includes(2))
     }
+  },
+  mounted () {
+    this.fetchData()
   },
   methods: {
     fetchData () {
