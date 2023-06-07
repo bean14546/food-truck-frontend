@@ -1,0 +1,48 @@
+<template>
+  <div>
+    <v-card
+      class="d-flex justify-center align-center rounded-pill elevation-0"
+      :color="color"
+      width="80px"
+      height="80px"
+      @click="goToCategory(category.id)"
+    >
+      <v-img :src="category.Category_Image" />
+    </v-card>
+  </div>
+</template>
+
+<script>
+export default {
+  name: 'CategoryCardComponent',
+  props: {
+    color: {
+      type: String,
+      default: 'secondary'
+    },
+    to: {
+      type: [String, Number],
+      default: 'not-found'
+    },
+    category: {
+      type: Object,
+      default: () => {
+        return {
+          id: null,
+          Category_Name: null,
+          Category_Image: null
+        }
+      }
+    }
+  },
+  methods: {
+    goToCategory (id) {
+      this.$router.push({ path: '/food-truck/food', hash: `${id}` })
+    }
+  }
+}
+</script>
+
+<style lang="scss" scoped>
+// ต้องมี comment เนื่องจากเชื่อมกับ scss
+</style>

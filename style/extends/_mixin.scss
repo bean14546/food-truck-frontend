@@ -1,0 +1,12 @@
+@mixin lineClamp ($line, $lineHeight) {
+	height: calc(#{$lineHeight} * #{$line});
+	display: -webkit-box;
+	-webkit-line-clamp: $line;
+	-webkit-box-orient: vertical;
+	overflow: hidden;
+	text-overflow: ellipsis;
+}
+
+@mixin colorGradient ($color) {
+	background: linear-gradient(109.3deg, rgba(255, 255, 255, 0.2) 0%, rgba(255, 255, 255, 0.180208) 34.28%, rgba(255, 255, 255, 0) 68.56%), $color;
+}
