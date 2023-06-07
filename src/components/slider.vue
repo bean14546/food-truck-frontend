@@ -19,3 +19,7 @@ export default {
   }
 }
 </script>
+
+<style lang="scss" scoped>
+// ต้องมี comment เนื่องจากเชื่อมกับ scss
+</style>

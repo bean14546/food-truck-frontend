@@ -14,6 +14,7 @@ export default new Vuetify({
         background: '#FAFAFA',
         lightGray: '#f4f4f4',
         grey: '#A0A0A0',
+        darkGrey: '#707070',
         green: '#2F9200',
         yellow: '#FBB806'
       }

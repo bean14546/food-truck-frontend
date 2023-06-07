@@ -4,7 +4,6 @@
       <h1 class="primary--text font-weight-regular mb-6">สวัสดี ผู้ใช้</h1>
       <v-autocomplete
         :items="food"
-        :search-input.sync="search"
         placeholder="ค้นหา"
         background-color="lightGray"
         item-text="Food_Name"
@@ -26,16 +25,18 @@
           <span>{{ data.item.Food_Name }}</span>
         </template>
         <template v-slot:item="data">
-          <v-list-item-avatar>
-            <img :src="data.item.Food_Image" />
-          </v-list-item-avatar>
-          <v-list-item-content>
-            <v-list-item-title v-text="data.item.Food_Name" />
-            <v-list-item-subtitle v-text="data.item.Food_Description" />
-          </v-list-item-content>
-          <v-list-item-action>
-            <span class="green--text"> {{ data.item.Food_Price }} บาท </span>
-          </v-list-item-action>
+          <v-list-item @click="goToSlug(data.item.id)">
+            <v-list-item-avatar>
+              <img :src="data.item.Food_Image" />
+            </v-list-item-avatar>
+            <v-list-item-content>
+              <v-list-item-title v-text="data.item.Food_Name" />
+              <v-list-item-subtitle v-text="data.item.Food_Description" />
+            </v-list-item-content>
+            <v-list-item-action>
+              <span class="green--text"> {{ data.item.Food_Price }} บาท </span>
+            </v-list-item-action>
+          </v-list-item>
         </template>
       </v-autocomplete>
     </section>
@@ -45,7 +46,7 @@
         :items="recommendFood"
       >
         <template #item="{ item }">
-          <menuCardComponent class="mr-4" recommend color="#F53B50" :food="item" />
+          <menuCardComponent class="mr-4" :food="item" :to="item.id" color="#F53B50" name-slug="food" recommend />
         </template>
       </sliderComponent>
     </section>
@@ -73,7 +74,7 @@
           :items="newFood"
         >
           <template #item="{ item }">
-            <menuCardComponent class="mr-4" :food="item" />
+            <menuCardComponent class="mr-4" :food="item" :to="item.id" name-slug="food" />
           </template>
         </sliderComponent>
       </div>
@@ -107,11 +108,11 @@ export default {
   computed: {
     // กรองเอาแต่เมนูแนะนำจากเมนูทั้งหมด
     recommendFood () {
-      return this.food.filter(item => item.Food_Status.map(item => item.id).includes(1))
+      return this.food.filter(item => item.is_recommend === 1)
     },
     // กรองเอาแต่เมนูใหม่จากเมนูทั้งหมด
     newFood () {
-      return this.food.filter(item => item.Food_Status.map(item => item.id).includes(2))
+      return this.food.filter(item => item.is_new === 1)
     }
   },
   mounted () {
@@ -125,7 +126,14 @@ export default {
       categoryApi.getAll().then((res) => {
         this.category = res.data
       })
+    },
+    goToSlug (id) {
+      this.$router.push(`/food-truck/_food_slug/${id}`)
     }
   }
 }
 </script>
+
+<style lang="scss" scoped>
+  // ต้องมี comment เนื่องจากเชื่อมกับ scss
+</style>

@@ -5,6 +5,7 @@
       :color="color"
       width="80px"
       height="80px"
+      @click="goToCategory(category.id)"
     >
       <v-img :src="category.Category_Image" />
     </v-card>
@@ -19,6 +20,10 @@ export default {
       type: String,
       default: 'secondary'
     },
+    to: {
+      type: [String, Number],
+      default: 'not-found'
+    },
     category: {
       type: Object,
       default: () => {
@@ -29,9 +34,15 @@ export default {
         }
       }
     }
+  },
+  methods: {
+    goToCategory (id) {
+      this.$router.push({ path: '/food-truck/food', hash: `${id}` })
+    }
   }
 }
 </script>
 
-<style>
+<style lang="scss" scoped>
+// ต้องมี comment เนื่องจากเชื่อมกับ scss
 </style>
