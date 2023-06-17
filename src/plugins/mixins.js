@@ -18,13 +18,11 @@ export const mixins = {
       const priceDecimal = (value/1).toFixed(2)
       const formatPrice = priceDecimal.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',')
       return formatPrice
-      return priceDecimal
     },
     formatNumber (value) {
       const priceDecimal = (value/1)
       const formatPrice = priceDecimal.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',')
       return formatPrice
-      return priceDecimal
     }
   }
 }
