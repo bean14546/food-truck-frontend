@@ -52,12 +52,15 @@
 </template>
 
 <script>
+// API
 import optionApi from '@/api/optionApi'
+// Component
 import headerLayout from '@/components/backend/layout/header'
 import flexibleTable from '@/components/backend/table/flexibleTable'
 import pagination from '@/components/backend/pagination'
-import confirmModal from '@/components/backend/modal/confirm'
 import optionModal from '@/components/backend/modal/food/options/optionModal'
+import confirmModal from '@/components/backend/modal/confirm'
+// mixins
 import { mixins } from '@/plugins/mixins'
 export default {
   name: 'OptionManagementPage',
@@ -65,8 +68,8 @@ export default {
     headerLayout,
     flexibleTable,
     pagination,
-    confirmModal,
-    optionModal
+    optionModal,
+    confirmModal
   },
   mixins:[mixins],
   data () {
@@ -145,6 +148,7 @@ export default {
     },
     addOption () {
       this.$refs.optionModal.show().then((res) => {
+        this.loading = true
         optionApi.create(res).then(() => {
           if (!this.search) {
             this.fetchData(this.$store.getters.getCurrentPage)
@@ -153,11 +157,13 @@ export default {
           }
         }).catch((error) =>{
           console.log('error', error)
+          this.loading = false
         })
       })
     },
     editOption (optionObj) {
       this.$refs.optionModal.show(optionObj).then((res) => {
+        this.loading = true
         optionApi.update(optionObj.id, res).then(() => {
           if (!this.search) {
             this.fetchData(this.$store.getters.getCurrentPage)
@@ -166,12 +172,14 @@ export default {
           }
         }).catch((error) =>{
           console.log('error', error)
+          this.loading = false
         })
       })
     },
     deleteOption (optionObj) {
-      const text = `คุณต้องการลบ${optionObj.Option_Name}หรือไม่`
+      const text = `คุณต้องการลบ "${optionObj.Option_Name}" หรือไม่`
       this.$refs.confirmModal.show(optionObj, text).then((res) => {
+        this.loading = true
         optionApi.delete(res.id).then(() => {
           if (!this.search) {
             this.fetchData(this.$store.getters.getCurrentPage)
@@ -180,6 +188,7 @@ export default {
           }
         }).catch((error) =>{
           console.log('error', error)
+          this.loading = false
         })
       })
     },

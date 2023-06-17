@@ -5,7 +5,7 @@
       <v-container class="white rounded-lg pa-6">
         <v-tabs v-model="tab" class="mb-4">
           <template v-for="(status, index) in listStatusItems" >
-            <v-tab :href="`#tab-${index}`" :key="`${status.Order_List_Status_Name}-${index}`">
+            <v-tab :href="`#${index}`" :key="`${status.Order_List_Status_Name}-${index}`">
               {{ status.Order_List_Status_Name }}
             </v-tab>
           </template>
@@ -19,7 +19,7 @@
               striped
             >
               <template #index="{ index }">
-                <span>{{ indexPage($store.getters.getCurrentPage, perPage, index) }}</span>
+                <span>{{ index + 1 }}</span>
               </template>
               <template #Food_Image="{ item }">
                 <v-img :src="item.Food.Food_Image" width="40%" max-width="100px" aspect-ratio="1" contain />
@@ -47,8 +47,8 @@
             </flexibleTable>
           </v-tab-item>
         </v-tabs-items>
+        <pagination :pageCount="lastPage" @onChangePage="changePage" no-shadow />
       </v-container>
-      <pagination :pageCount="lastPage" @onChangePage="changePage" no-shadow />
     </section>
     <checkOrderListModal ref="checkOrderListModal" />
     <countdownOrderModal ref="countdownOrderModal" />
@@ -57,15 +57,18 @@
 </template>
 
 <script>
+// API
 import orderListApi from '@/api/orderListApi'
+// import orderListStatusApi from '@/api/orderListStatusApi'
+// import countdownApi from '@/api/countdownApi'
+// Component
 import headerLayout from '@/components/backend/layout/header'
 import flexibleTable from '@/components/backend/table/flexibleTable'
 import pagination from '@/components/backend/pagination'
-import cancelOrderListModal from '@/components/backend/modal/orderList/orderListManage/cancelOrderList'
 import checkOrderListModal from '@/components/backend/modal/orderList/orderListManage/checkOrderList'
 import countdownOrderModal from '@/components/backend/modal/orderList/orderListManage/countdownOrderList'
-import orderListStatusApi from '@/api/orderListStatusApi'
-import countdownApi from '@/api/countdownApi'
+import cancelOrderListModal from '@/components/backend/modal/orderList/orderListManage/cancelOrderList'
+// mixins
 import { mixins } from '@/plugins/mixins'
 export default {
   name: 'OrderManagementPage',
@@ -73,14 +76,16 @@ export default {
     headerLayout,
     flexibleTable,
     pagination,
-    cancelOrderListModal,
     checkOrderListModal,
-    countdownOrderModal
+    countdownOrderModal,
+    cancelOrderListModal
   },
   mixins:[mixins],
   data () {
     return {
       tab: null,
+      page: 1,
+      length: null,
       headers: [
         { text: 'ลำดับ', align: 'start', value: 'index', width: '5%' },
         { text: 'รูปภาพ', align: 'start', value: 'Food_Image', width: '15%' },
@@ -90,10 +95,12 @@ export default {
         { text: 'สร้างเมื่อ', align: 'center', value: 'created_at', width: '15%' },
         { text: 'จัดการ', align: 'center', value: 'manage', width: '10%' }
       ],
-      items: [],
+      itemsWaitingStatus: [],
+      itemsInProgressStatus: [],
+      itemsCancelStatus: [],
+      itemsSuccessStatus: [],
       listStatusItems: [],
       time: [],
-      search: null,
       loading: false,
 
       // Pagination
@@ -104,32 +111,20 @@ export default {
     }
   },
   computed: {
-    waitingStatus () {
-      return this.items.filter(item => item.order_list_status_id === 1)
-    },
-    inProgressStatus () {
-      return this.items.filter(item => item.order_list_status_id === 2)
-    },
-    cancelStatus () {
-      return this.items.filter(item => item.order_list_status_id === 3)
-    },
-    successStatus () {
-      return this.items.filter(item => item.order_list_status_id === 4)
-    },
     statusFilterTab () {
       let items = []
-      switch (this.tab) {
-      case 'tab-0':
-        items = this.waitingStatus
+      switch (Number(this.tab)) {
+      case 0:
+        items = this.itemsWaitingStatus
         break
-      case 'tab-1':
-        items = this.inProgressStatus
+      case 1:
+        items = this.itemsInProgressStatus
         break
-      case 'tab-2':
-        items = this.cancelStatus
+      case 2:
+        items = this.itemsCancelStatus
         break
-      case 'tab-3':
-        items = this.successStatus
+      case 3:
+        items = this.itemsSuccessStatus
         break
       }
       return items
@@ -139,62 +134,61 @@ export default {
     this.clear()
   },
   methods: {
-    fetchData (pageNumber) {
-      this.loading = true
-      orderListApi.getAndCount(pageNumber).then((res) => {
-        this.items = res.result.data
-        this.$store.commit('setCurrentPage', res.result.meta ? res.result.meta.current_page: res.result.current_page)
-        this.perPage = res.result.meta ? res.result.meta.per_page: res.result.per_page
-        this.total = res.result.meta ? res.result.meta.total : res.result.total
-        this.lastPage = res.result.meta ? res.result.meta.last_page : res.result.last_page
-        this.loading = false
-      }).catch((err) => {
-        console.log('มีบางอย่างผิดพลาด', err)
-        this.loading = false
-      })
-      orderListStatusApi.getAll().then((res) => {
-        this.listStatusItems = res.data
-      })
-      countdownApi.getAll().then((res) => {
-        this.time = res.data
-      })
-    },
-    searchDataOnChangePage (pageNumber) {
-      this.loading = true
-      if (this.search) {
-        orderListApi.search(this.search, pageNumber).then((res) => {
-          this.items = res.result.data
-          this.$store.commit('setCurrentPage', res.result.meta ? res.result.meta.current_page: res.result.current_page)
-          this.perPage = res.result.meta ? res.result.meta.per_page: res.result.per_page
-          this.total = res.result.meta ? res.result.meta.total : res.result.total
-          this.lastPage = res.result.meta ? res.result.meta.last_page : res.result.last_page
-          this.loading = false
-        }).catch(() => {
-          console.log('ไม่พบข้อมูลที่ค้นหา')
-          this.loading = false
-        })
-      } else {
-        this.clear()
-      }
-    },
-    searchData () {
-      this.loading = true
-      if (this.search) {
-        orderListApi.search(this.search).then((res) => {
-          this.items = res.result.data
-          this.$store.commit('setCurrentPage', res.result.meta ? res.result.meta.current_page: res.result.current_page)
-          this.perPage = res.result.meta ? res.result.meta.per_page: res.result.per_page
-          this.total = res.result.meta ? res.result.meta.total : res.result.total
-          this.lastPage = res.result.meta ? res.result.meta.last_page : res.result.last_page
-          this.loading = false
-        }).catch(() => {
-          console.log('ไม่พบข้อมูลที่ค้นหา')
-          this.loading = false
-        })
-      } else {
-        this.clear()
-      }
-    },
+    // fetchData (pageNumber) {
+    //   this.loading = true
+    //   // Waiting Status
+    //   orderListApi.getAndCountOrderListID1(pageNumber).then((res) => {
+    //     this.itemsWaitingStatus = res.result.data
+    //     this.$store.commit('setCurrentPage', res.result.meta ? res.result.meta.current_page: res.result.current_page)
+    //     this.perPage = res.result.meta ? res.result.meta.per_page: res.result.per_page
+    //     this.total = res.result.meta ? res.result.meta.total : res.result.total
+    //     this.lastPage = res.result.meta ? res.result.meta.last_page : res.result.last_page
+    //   }).catch((err) => {
+    //     console.log('มีบางอย่างผิดพลาด', err)
+    //     this.loading = false
+    //   })
+    //   // InProgress Status
+    //   orderListApi.getAndCountOrderListID2(pageNumber).then((res) => {
+    //     this.itemsInProgressStatus = res.result.data
+    //     this.$store.commit('setCurrentPage', res.result.meta ? res.result.meta.current_page: res.result.current_page)
+    //     this.perPage = res.result.meta ? res.result.meta.per_page: res.result.per_page
+    //     this.total = res.result.meta ? res.result.meta.total : res.result.total
+    //     this.lastPage = res.result.meta ? res.result.meta.last_page : res.result.last_page
+    //   }).catch((err) => {
+    //     console.log('มีบางอย่างผิดพลาด', err)
+    //     this.loading = false
+    //   })
+    //   // Cancel Status
+    //   orderListApi.getAndCountOrderListID3(pageNumber).then((res) => {
+    //     this.itemsCancelStatus = res.result.data
+    //     this.$store.commit('setCurrentPage', res.result.meta ? res.result.meta.current_page: res.result.current_page)
+    //     this.perPage = res.result.meta ? res.result.meta.per_page: res.result.per_page
+    //     this.total = res.result.meta ? res.result.meta.total : res.result.total
+    //     this.lastPage = res.result.meta ? res.result.meta.last_page : res.result.last_page
+    //   }).catch((err) => {
+    //     console.log('มีบางอย่างผิดพลาด', err)
+    //     this.loading = false
+    //   })
+    //   // Success Status
+    //   orderListApi.getAndCountOrderListID4(pageNumber).then((res) => {
+    //     this.itemsSuccessStatus = res.result.data
+    //     this.$store.commit('setCurrentPage', res.result.meta ? res.result.meta.current_page: res.result.current_page)
+    //     this.perPage = res.result.meta ? res.result.meta.per_page: res.result.per_page
+    //     this.total = res.result.meta ? res.result.meta.total : res.result.total
+    //     this.lastPage = res.result.meta ? res.result.meta.last_page : res.result.last_page
+    //     this.loading = false
+    //   }).catch((err) => {
+    //     console.log('มีบางอย่างผิดพลาด', err)
+    //     this.loading = false
+    //   })
+
+    //   orderListStatusApi.getAll().then((res) => {
+    //     this.listStatusItems = res.data
+    //   })
+    //   countdownApi.getAll().then((res) => {
+    //     this.time = res.data
+    //   })
+    // },
     checkOrder (item) {
       this.$refs.checkOrderListModal.show(item).then(() => {
         const checkOrder = { ...item }
@@ -204,45 +198,18 @@ export default {
         })
       })
     },
-    // checkOrder (orderObj) {
-    //   this.$refs.checkOrderListModal.show(orderObj).then((res) => {
-    //     orderListApi.update(orderObj.id, res).then(() => {
-    //       if (!this.search) {
-    //         this.fetchData(this.$store.getters.getCurrentPage)
-    //       } else {
-    //         this.searchDataOnChangePage(this.$store.getters.getCurrentPage)
-    //       }
-    //     })
-    //   })
-    // },
     cancelOrder (item) {
       this.$refs.cancelOrderListModal.show().then((res) => {
+        this.loading = true
         const orderListObj = { ...item, order_list_status_id: 3, Chef_Note: res }
         orderListApi.update(orderListObj.id ,orderListObj).then(() => {
           this.fetchData()
         }).catch((error) =>{
           console.log('error', error)
+          this.loading = false
         })
       })
     },
-    changePage (event) {
-      this.$store.commit('setCurrentPage', event)
-      if (!this.search) {
-        this.fetchData(this.$store.getters.getCurrentPage)
-      } else {
-        this.searchDataOnChangePage(this.$store.getters.getCurrentPage)
-      }
-    },
-    clear () {
-      this.search = null
-      this.$store.commit('setCurrentPage', 1)
-      this.fetchData(this.$store.getters.getCurrentPage)
-    },
-    // calculateTotalPrice (item) {
-    //   const priceArray = item.map(item => item.Price)
-    //   const totalPrice = priceArray.reduce((prev, cur) => prev + cur, 0)
-    //   return totalPrice
-    // },
     mapStatus (id) {
       let status = ''
       switch (id) {
@@ -260,6 +227,14 @@ export default {
         break
       }
       return status
+    },
+    changePage (event) {
+      this.$store.commit('setCurrentPage', event)
+      this.fetchData(this.$store.getters.getCurrentPage)
+    },
+    clear () {
+      this.$store.commit('setCurrentPage', 1)
+      this.fetchData(this.$store.getters.getCurrentPage)
     }
   }
 }

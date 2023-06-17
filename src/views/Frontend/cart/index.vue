@@ -51,11 +51,6 @@ import { mapGetters, mapState } from 'vuex'
 export default {
   name: 'CartPage',
   components: { menuCardComponent },
-  data () {
-    return {
-      takeaway: false
-    }
-  },
   computed: {
     ...mapState([ 'cart' ]),
     ...mapGetters([ 'total' ])
@@ -76,7 +71,7 @@ export default {
           this.createOrder(userJSON.id)
         })
       } else {
-        // เทียบ username ใน localStorage กับ DB ว่ามีและตรงกันหรือไม่ ถ้ามีและตรงกันให้ส่ง userId ให้กับ order
+        // เทียบ username ใน localStorage กับ DB ว่ามีและตรงกัน" หรือไม่ ถ้ามีและตรงกันให้ส่ง userId ให้กับ order
         const user = localStorage.getItem('user')
         const userJSON = JSON.parse(user)
         await userApi.getOne(userJSON.id).then((res) => {
@@ -98,7 +93,7 @@ export default {
           Price: foodInTheCart.total,
           Note: foodInTheCart.note,
           user_id: userId,
-          isTakeaway: this.takeaway
+          isTakeaway: foodInTheCart.isTakeaway
         }
         orderListApi.create(orderList).then((orderListResponse) => {
           foodInTheCart.optionSelected.forEach(optionSelected => {

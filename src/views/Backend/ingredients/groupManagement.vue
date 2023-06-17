@@ -46,18 +46,21 @@
       </v-container>
       <pagination :pageCount="lastPage" @onChangePage="changePage" no-shadow />
     </section>
-    <confirmModal ref="confirmModal" icon="mdi-trash-can" />
     <categoryModal ref="categoryModal" />
+    <confirmModal ref="confirmModal" icon="mdi-trash-can" />
   </div>
 </template>
 
 <script>
+// API
 import ingredientGroupApi from '@/api/ingredientGroupApi'
+// Component
 import headerLayout from '@/components/backend/layout/header'
 import flexibleTable from '@/components/backend/table/flexibleTable'
 import pagination from '@/components/backend/pagination'
-import confirmModal from '@/components/backend/modal/confirm'
 import categoryModal from '@/components/backend/modal/ingredient/categoryModal'
+import confirmModal from '@/components/backend/modal/confirm'
+// mixins
 import { mixins } from '@/plugins/mixins'
 export default {
   name: 'CategoryManagementPage',
@@ -65,8 +68,8 @@ export default {
     headerLayout,
     flexibleTable,
     pagination,
-    confirmModal,
-    categoryModal
+    categoryModal,
+    confirmModal
   },
   mixins:[mixins],
   data () {
@@ -145,6 +148,7 @@ export default {
     },
     addCategory () {
       this.$refs.categoryModal.show().then((res) => {
+        this.loading = true
         ingredientGroupApi.create(res).then(() => {
           if (!this.search) {
             this.fetchData(this.$store.getters.getCurrentPage)
@@ -153,11 +157,13 @@ export default {
           }
         }).catch((error) =>{
           console.log('error', error)
+          this.loading = false
         })
       })
     },
     editCategory (categoryObj) {
       this.$refs.categoryModal.show(categoryObj).then((res) => {
+        this.loading = true
         ingredientGroupApi.update(categoryObj.id, res).then(() => {
           if (!this.search) {
             this.fetchData(this.$store.getters.getCurrentPage)
@@ -166,12 +172,14 @@ export default {
           }
         }).catch((error) =>{
           console.log('error', error)
+          this.loading = false
         })
       })
     },
     deleteCategory (categoryObj) {
-      const text = `คุณต้องการลบ${categoryObj.ingredientGroup}หรือไม่`
+      const text = `คุณต้องการลบ "${categoryObj.ingredientGroup}" หรือไม่`
       this.$refs.confirmModal.show(categoryObj, text).then((res) => {
+        this.loading = true
         ingredientGroupApi.delete(res.id).then(() => {
           if (!this.search) {
             this.fetchData(this.$store.getters.getCurrentPage)
@@ -180,6 +188,7 @@ export default {
           }
         }).catch((error) =>{
           console.log('error', error)
+          this.loading = false
         })
       })
     },

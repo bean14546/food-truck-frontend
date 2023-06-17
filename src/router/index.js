@@ -56,11 +56,6 @@ const routes = [
         path: 'order',
         name: 'OrderPage',
         component: () => import('@/views/Frontend/order/index.vue')
-      },
-      {
-        path: '_order_slug/:_slug',
-        name: 'OrderSlugPage',
-        component: () => import('@/views/Frontend/order/_slug.vue')
       }
     ]
   },

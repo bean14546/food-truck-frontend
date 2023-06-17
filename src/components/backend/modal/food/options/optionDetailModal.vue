@@ -58,7 +58,6 @@ export default {
       optionDetailRules: {
         Option_Detail_Name: [ value => !!value || 'Required.' ],
         Option_Detail_Price: [ value => value >= 0 || 'Value must be greater than or equal to 0.' ],
-        isActive: [ value => !!value || 'Required.' ],
         option_id: [ value => !!value || 'Required.' ]
       },
       optionDetailObj: {

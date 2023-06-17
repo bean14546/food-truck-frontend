@@ -27,21 +27,24 @@
 </template>
 
 <script>
+// API
 import stockApi from '@/api/stockApi'
 import stockDateApi from '@/api/stockDateApi'
 import logDateStockApi from '@/api/logDateStockApi'
-import pagination from '@/components/backend/pagination'
+// Component
 import headerLayout from '@/components/backend/layout/header'
 import flexibleTable from '@/components/backend/table/flexibleTable'
+import pagination from '@/components/backend/pagination'
 import stockModal from '@/components/backend/modal/ingredient/stockModal'
+// mixins
 import { mixins } from '@/plugins/mixins'
 export default {
   name: 'StockManagementPage',
   components: {
     headerLayout,
     flexibleTable,
-    stockModal,
-    pagination
+    pagination,
+    stockModal
   },
   mixins:[mixins],
   data () {
@@ -86,79 +89,75 @@ export default {
         this.loading = false
       })
     },
-    addStock () {
-      this.$refs.stockModal.show().then((modalResponse) => {
-        // ดึงข้อมูลของวันนี้
-        stockDateApi.getAll().then((stockDateGetAllResponse) => {
-          // ถ้าข้อมูลของ Stock Date มีค่า (ครั้งแรกหลังจาก migrate DB)
-          if (stockDateGetAllResponse && stockDateGetAllResponse.data.length > 0) {
-            stockDateApi.search(modalResponse[0].date).then((stockDateSearchResponse) => {
-              // ถ้าค้นหาวันที่เจอ
-              if (stockDateSearchResponse && stockDateSearchResponse.data.length > 0) {
-                stockDateApi.getOne(stockDateSearchResponse.data[0].id).then((stockDateGetOne) => {
-                  // เช็คว่าใน DB ของวันนี้มี ingredient_id ที่ซ้ำกับตัวที่กำลังจเพิ่มลงไปใหม่หรือไม่
-                  const dataInDatabase = stockDateGetOne.data.ingredient
-                  const dataInRes = modalResponse.map(item => item.ingredient_id)
-                  const condition = dataInDatabase.some(element => dataInRes.includes(element.ingredient_id))
-                  if (!condition) {
-                    this.manageStock(modalResponse)
-                  } else {
-                    console.log('วันนี้ได้เพิ่มจำนวนของวัตถุดิบนี้ไปแล้ว') // อย่าลืม เปลี่ยนเป็น tost
-                  }
-                }).catch((error) =>{
-                  console.log('error', error)
-                })
-              }
-              // ถ้าค้นหาวันที่ไม่เจอ
-              else {
-                this.manageStock(modalResponse)
-              }
-            }).catch((error) =>{
-              console.log('error', error)
-            })
-          }
-          // ถ้าข้อมูลของ Stock Date ไม่มีค่า (ครั้งแรกหลังจาก migrate DB)
-          else {
-            this.manageStock(modalResponse)
-          }
-        }).catch((error) =>{
-          console.log('error', error)
-        })
-        this.fetchData()
-      })
-    },
-    manageStock (modalResponse) {
-      modalResponse.forEach(element => {
-        stockApi.update(element.stock_id, { quantity: element.quantity }).then(() => {
-          stockDateApi.search(element.date).then((stockDateSearchResponse2) => {
-            if (stockDateSearchResponse2.data.length > 0 && stockDateSearchResponse2.data[0].id) {
+    async addStock () {
+      try {
+        this.loading = true
+        const modalResponse = await this.$refs.stockModal.show()
+        const stockDateGetAllResponse = await stockDateApi.getAll()
+        const stockDateAllData = stockDateGetAllResponse.data
+        // ตรวจสอบ DB stock_date ว่ามีวันที่ ที่ถูกสร้างไว้แล้วหรือยัง
+        if (stockDateAllData.length > 0) {
+          // ถ้ามีให้ค้นหาต่อว่าวันที่ ที่ return มาจาก modal ถูกสร้างใน DB stock_date แล้วหรือยัง
+          const dateNow = modalResponse[0].date
+          const dateInDB = stockDateAllData.map(item => item.date.stock_date)
+          const condition = dateInDB.includes(dateNow)
+          // ถ้ามีวันที่ใน stock_date และ ในนั้นมีวันที่ที่กำลังจะเพิ่มเข้าไป
+          if (condition) {
+            // ให้ทำการ อัพเดต stock ของ ingredient ที่ลูกค้าเพิ่มใหม่ และ join ingredients_id กับ stock_date_id ในตาราง log_date_stock เป็นวันเดียวกันทั้งหมด เพื่อเก็บ log
+            const dateObjInDB = stockDateAllData.map(item => item.date).filter(item => item.stock_date === dateNow)
+            const stock_date_id = dateObjInDB[0].stock_date_id
+
+            await Promise.all(modalResponse.map(async (element) => {
+              await stockApi.update(element.stock_id, { quantity: element.quantity })
               const logDateStockObj = {
-                stock_date_id: stockDateSearchResponse2.data[0].id,
-                ingredient_id: element.ingredient_id
+                ingredient_id: element.ingredient_id,
+                stock_date_id: stock_date_id,
+                quantity: element.quantity
               }
-              logDateStockApi.create(logDateStockObj)
-            } else {
-              stockDateApi.create({ date: element.date }).then((stockDateCreateResponse) => {
-                const logDateStockObj = {
-                  stock_date_id: stockDateCreateResponse.data.id,
-                  ingredient_id: element.ingredient_id
-                }
-                logDateStockApi.create(logDateStockObj)
-              }).catch((error) =>{
-                console.log('error', error)
-              })
+              await logDateStockApi.create(logDateStockObj)
+            }))
+          }
+          // แต่ถ้ามีวันที่ใน stock_date แต่ในนั้นไม่มีวันที่ที่กำลังจะเพิ่มเข้าไป
+          else {
+            // ให้ทำการสร้างวันที่ก่อน แล้วค่อย join ingredients_id กับ stock_date_id ในตาราง log_date_stock เป็นวันเดียวกันทั้งหมด
+            const res = await stockDateApi.create({ date: dateNow })
+
+            await Promise.all(modalResponse.map(async (element) => {
+              await stockApi.update(element.stock_id, { quantity: element.quantity })
+              const logDateStockObj = {
+                ingredient_id: element.ingredient_id,
+                stock_date_id: res.data.id,
+                quantity: element.quantity
+              }
+              await logDateStockApi.create(logDateStockObj)
+            }))
+          }
+        }
+        // ถ้าวันที่ไม่มีใน DB stock_date ให้สร้างวันที่ให้กับ stock_date ใหม่
+        else {
+          const dateNow = modalResponse[0].date
+          const res = await stockDateApi.create({ date: dateNow })
+
+          await Promise.all(modalResponse.map(async (element) => {
+            await stockApi.update(element.stock_id, { quantity: element.quantity })
+            const logDateStockObj = {
+              ingredient_id: element.ingredient_id,
+              stock_date_id: res.data.id,
+              quantity: element.quantity
             }
-          }).catch((error) =>{
-            console.log('error', error)
-          })
-        }).catch((error) =>{
-          console.log('error', error)
-        })
-      })
+            await logDateStockApi.create(logDateStockObj)
+          }))
+        }
+        await this.fetchData(1)
+      } catch (error) {
+        console.log('error', error)
+        this.loading = false
+      }
     },
-    checkStock (item) {
-      stockDateApi.getOne(item.id).then((res) => {
-        this.$refs.stockModal.show(res.data)
+    checkStock (data) {
+      logDateStockApi.getAll().then((res) => {
+        const responseFilters = res.data.filter(item => item.date.stock_date_id === data.id)
+        this.$refs.stockModal.show(responseFilters)
       }).catch((error) =>{
         console.log('error', error)
       })

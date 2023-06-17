@@ -4,8 +4,20 @@ export default {
   getAll: () => {
     return axios.get('orderList/getAll').then(response => response.data)
   },
-  getAndCount: () => {
-    return axios.get('orderList/getAndCount').then(response => response.data)
+  getAndCount: (searchParams) => {
+    return axios.get('orderList/getAndCount', { params: { page: searchParams } }).then(response => response.data)
+  },
+  getAndCountOrderListID1: (searchParams) => {
+    return axios.get('orderList/getAndCountOrderListID1', { params: { page: searchParams } }).then(response => response.data)
+  },
+  getAndCountOrderListID2: (searchParams) => {
+    return axios.get('orderList/getAndCountOrderListID2', { params: { page: searchParams } }).then(response => response.data)
+  },
+  getAndCountOrderListID3: (searchParams) => {
+    return axios.get('orderList/getAndCountOrderListID3', { params: { page: searchParams } }).then(response => response.data)
+  },
+  getAndCountOrderListID4: (searchParams) => {
+    return axios.get('orderList/getAndCountOrderListID4', { params: { page: searchParams } }).then(response => response.data)
   },
   getOne: (id) => {
     return axios.get(`orderList/getOne/${id}`).then(response => response.data)

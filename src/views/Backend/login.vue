@@ -30,7 +30,9 @@
 </template>
 
 <script>
+// API
 import authApi from '@/api/authApi'
+// Component
 import Swal from 'sweetalert2'
 export default {
   name: 'AdminLoginPage',

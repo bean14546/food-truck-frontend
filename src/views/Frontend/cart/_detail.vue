@@ -10,22 +10,12 @@
       <v-bottom-navigation class="d-flex flex-column elevation-0 px-5" height="100px" color="primary" fixed >
           <div class="d-flex justify-center align-center w-100">
             <v-btn
-              color="primary"
-              class="rounded mb-1"
-              block
-              @click="goToEditMenu"
-            >
-              <span class="white--text text-subtitle-1 font-weight-regular"> แก้ไข </span>
-            </v-btn>
-          </div>
-          <div class="d-flex justify-center align-center w-100">
-            <v-btn
               color="secondary"
               class="rounded"
               block
               @click="cancelMenu"
             >
-              <span class="dark--text text-subtitle-1 font-weight-regular"> ยกเลิก </span>
+              <span class="dark--text text-subtitle-1 font-weight-regular"> ยกเลิกเมนูนี้ </span>
             </v-btn>
           </div>
       </v-bottom-navigation>
@@ -64,14 +54,11 @@ export default {
       Topping: this.detail.toppingSelected,
       Amount: this.detail.quantity,
       Note: this.detail.note,
+      isTakeaway: this.detail.isTakeaway,
       Price: this.detail.total
     }
   },
   methods: {
-    goToEditMenu () {
-      console.log('edit')
-      // this.$router.push(`/food-truck/_food_slug/${this.items.Food.food_id}`)
-    },
     async cancelMenu () {
       await this.$store.commit('deleteOrder', this.detail.index)
       await this.$router.back()

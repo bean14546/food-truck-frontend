@@ -56,6 +56,10 @@
           <p>ราคารวม</p>
           <p class="darkGrey--text">{{ items.Price }}</p>
         </div>
+        <div class="d-flex justify-space-between">
+          <p>ห่อกลับบ้าน</p>
+          <p class="darkGrey--text">{{ items.isTakeaway ? 'ใช่' : 'ไม่ใช่' }}</p>
+        </div>
         <div v-if="items && items.Chef_Note" class="d-flex justify-space-between">
           <p>โน๊ตจากร้านค้า</p>
           <p class="darkGrey--text">{{ items.Chef_Note }}</p>

@@ -60,22 +60,25 @@
 </template>
 
 <script>
+// API
 import ingredientApi from '@/api/ingredientApi'
 import stockApi from '@/api/stockApi'
-import ingredientModal from '@/components/backend/modal/ingredient/ingredientModal'
-import confirmModal from '@/components/backend/modal/confirm'
+// Component
+import headerLayout from '@/components/backend/layout/header'
 import flexibleTable from '@/components/backend/table/flexibleTable'
 import pagination from '@/components/backend/pagination'
-import headerLayout from '@/components/backend/layout/header'
+import ingredientModal from '@/components/backend/modal/ingredient/ingredientModal'
+import confirmModal from '@/components/backend/modal/confirm'
+// mixins
 import { mixins } from '@/plugins/mixins'
 export default {
   name: 'IngredientManagementPage',
   components: {
+    headerLayout,
     flexibleTable,
-    ingredientModal,
-    confirmModal,
     pagination,
-    headerLayout
+    ingredientModal,
+    confirmModal
   },
   mixins:[mixins],
   data () {
@@ -154,13 +157,9 @@ export default {
         this.clear()
       }
     },
-    clear () {
-      this.search = null
-      this.$store.commit('setCurrentPage', 1)
-      this.fetchData(this.$store.getters.getCurrentPage)
-    },
     addIngredient () {
       this.$refs.ingredientModal.show().then((resIngredient) => {
+        this.loading = true
         const stock = { quantity: 0 }
         stockApi.create(stock).then((res) => {
           const ingredient = {
@@ -178,14 +177,17 @@ export default {
             }
           }).catch((error) =>{
             console.log('error', error)
+            this.loading = false
           })
         }).catch((error) =>{
           console.log('error', error)
+          this.loading = false
         })
       })
     },
     editIngredient (ingredientObj) {
       this.$refs.ingredientModal.show(ingredientObj).then((res) => {
+        this.loading = true
         ingredientApi.update(ingredientObj.id, res).then(() => {
           if (!this.search) {
             this.fetchData(this.$store.getters.getCurrentPage)
@@ -194,12 +196,14 @@ export default {
           }
         }).catch((error) =>{
           console.log('error', error)
+          this.loading = false
         })
       })
     },
     deleteIngredient (ingredientObj) {
-      const text = `คุณต้องการลบ${ingredientObj.ingredient}หรือไม่`
+      const text = `คุณต้องการลบ "${ingredientObj.ingredient}" หรือไม่`
       this.$refs.confirmModal.show(ingredientObj, text).then((res) => {
+        this.loading = true
         ingredientApi.delete(res.id).then(() => {
           if (!this.search) {
             this.fetchData(this.$store.getters.getCurrentPage)
@@ -208,6 +212,7 @@ export default {
           }
         }).catch((error) =>{
           console.log('error', error)
+          this.loading = false
         })
       })
     },
@@ -218,6 +223,11 @@ export default {
       } else {
         this.searchDataOnChangePage(this.$store.getters.getCurrentPage)
       }
+    },
+    clear () {
+      this.search = null
+      this.$store.commit('setCurrentPage', 1)
+      this.fetchData(this.$store.getters.getCurrentPage)
     }
   }
 }

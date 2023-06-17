@@ -46,18 +46,21 @@
       </v-container>
       <pagination :pageCount="lastPage" @onChangePage="changePage" no-shadow />
     </section>
-    <confirmModal ref="confirmModal" icon="mdi-trash-can" />
     <unitModal ref="unitModal" />
+    <confirmModal ref="confirmModal" icon="mdi-trash-can" />
   </div>
 </template>
 
 <script>
+// API
 import unitApi from '@/api/ingredientUnitApi'
+// Component
 import headerLayout from '@/components/backend/layout/header'
 import flexibleTable from '@/components/backend/table/flexibleTable'
 import pagination from '@/components/backend/pagination'
-import confirmModal from '@/components/backend/modal/confirm'
 import unitModal from '@/components/backend/modal/ingredient/unitModal'
+import confirmModal from '@/components/backend/modal/confirm'
+// mixins
 import { mixins } from '@/plugins/mixins'
 export default {
   name: 'UnitManagementPage',
@@ -65,8 +68,8 @@ export default {
     headerLayout,
     flexibleTable,
     pagination,
-    confirmModal,
-    unitModal
+    unitModal,
+    confirmModal
   },
   mixins:[mixins],
   data () {
@@ -145,6 +148,7 @@ export default {
     },
     addUnit () {
       this.$refs.unitModal.show().then((res) => {
+        this.loading = true
         unitApi.create(res).then(() => {
           if (!this.search) {
             this.fetchData(this.$store.getters.getCurrentPage)
@@ -158,6 +162,7 @@ export default {
     },
     editUnit (unitObj) {
       this.$refs.unitModal.show(unitObj).then((res) => {
+        this.loading = true
         unitApi.update(unitObj.id, res).then(() => {
           if (!this.search) {
             this.fetchData(this.$store.getters.getCurrentPage)
@@ -166,12 +171,14 @@ export default {
           }
         }).catch((error) =>{
           console.log('error', error)
+          this.loading = false
         })
       })
     },
     deleteUnit (unitObj) {
-      const text = `คุณต้องการลบ${unitObj.unit}หรือไม่`
+      const text = `คุณต้องการลบ "${unitObj.unit}" หรือไม่`
       this.$refs.confirmModal.show(unitObj, text).then((res) => {
+        this.loading = true
         unitApi.delete(res.id).then(() => {
           if (!this.search) {
             this.fetchData(this.$store.getters.getCurrentPage)
