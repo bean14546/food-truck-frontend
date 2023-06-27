@@ -1,11 +1,6 @@
 <template>
   <div>
-    <div v-if="loading" class="d-flex justify-center align-center h-100vh">
-      <v-progress-circular
-        indeterminate
-        color="primary"
-      />
-    </div>
+    <progressLoaderComponent v-if="loading" fullScreen />
     <div v-else>
       <section id="header" class="px-6 pt-6 pb-0">
         <h1 class="primary--text font-weight-regular mb-6">สวัสดี ผู้ใช้</h1>
@@ -98,9 +93,11 @@ import categoryApi from '@/api/categoryApi'
 import menuCardComponent from '@/components/card/menuCard.vue'
 import categoryCardComponent from '@/components/card/categoryCard.vue'
 import sliderComponent from '@/components/slider.vue'
+import progressLoaderComponent from '@/components/progressLoader.vue'
 export default {
   name: 'HomePage',
   components: {
+    progressLoaderComponent,
     menuCardComponent,
     categoryCardComponent,
     sliderComponent
@@ -129,10 +126,10 @@ export default {
   methods: {
     async fetchData () {
       this.loading = true
-      foodApi.getAll().then((res) => {
+      await foodApi.getAll().then((res) => {
         this.food = res.data
       })
-      categoryApi.getAll().then((res) => {
+      await categoryApi.getAll().then((res) => {
         this.category = res.data
         this.loading = false
       })

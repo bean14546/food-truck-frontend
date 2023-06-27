@@ -1,11 +1,6 @@
 <template>
   <div>
-    <div v-if="loading" class="h-100vh d-flex justify-center align-center">
-      <v-progress-circular
-        indeterminate
-        color="primary"
-      />
-    </div>
+    <progressLoaderComponent v-if="loading" fullScreen />
     <div v-else>
       <section id="header">
         <div class="pt-6 px-6">
@@ -53,10 +48,11 @@
 import orderListApi from '@/api/orderListApi'
 import orderListStatusApi from '@/api/orderListStatusApi'
 // components
-import menuCardComponent from '@/components/card/menuCard.vue'
+import progressLoaderComponent from '@/components/progressLoader'
+import menuCardComponent from '@/components/card/menuCard'
 export default {
   name: 'OrderPage',
-  components: { menuCardComponent },
+  components: { progressLoaderComponent, menuCardComponent },
   data () {
     return {
       tab: null,
@@ -87,12 +83,12 @@ export default {
     await this.fetchData()
   },
   methods: {
-    fetchData () {
+    async fetchData () {
       this.loading = true
-      orderListApi.getAll().then((res) => {
+      await orderListApi.getAll().then((res) => {
         this.orderLists = res.data
       })
-      orderListStatusApi.getAll().then((res) => {
+      await orderListStatusApi.getAll().then((res) => {
         this.orderListStatus = res.data
         this.loading = false
       })

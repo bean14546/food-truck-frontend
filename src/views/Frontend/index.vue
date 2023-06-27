@@ -2,6 +2,7 @@
   <v-container fill-height>
     <v-btn color="primary" elevation="0" text absolute top right small @click="goToAdminPage">สำหรับผู้จัดการร้าน</v-btn>
     <section id="header" class="primary--text pa-5">
+      <v-img width="100px" :src="require('../../../style/assets/image/logo-general.png')" />
       <h1 class="font-weight-regular">ยินดีต้อนรับ.</h1>
       <p class="text-subtitle-3 mb-2">ยินดีต้อนรับเข้าสูระบบสั่งอาหารสำหรับ</p>
       <p class="text-subtitle-3 mb-2">รถ Food truck.</p>

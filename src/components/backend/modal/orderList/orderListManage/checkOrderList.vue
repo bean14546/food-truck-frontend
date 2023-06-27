@@ -1,13 +1,14 @@
 <template>
   <baseModal
     ref="baseModal"
-    nameSaveBtn="รับออเดอร์"
+    :name-save-btn="nameSaveBtn"
     :modal-name="modalName"
+    :hide-save-btn="hideSaveBtn"
     @close="clearModal"
     @save="validate"
   >
     <template #body>
-      <detailCardComponent :items="item" />
+      <detailCardComponent ref="detailCardComponent" :items="item" />
     </template>
   </baseModal>
 </template>
@@ -30,6 +31,12 @@ export default {
   computed: {
     modalName () {
       return 'รายการ Order'
+    },
+    nameSaveBtn () {
+      return this.item && this.item.order_list_status_id === 1 ? 'รับออเดอร์' : 'เสร็จสิ้น'
+    },
+    hideSaveBtn () {
+      return (this.item && this.item.order_list_status_id !== 3) && (this.item && this.item.order_list_status_id !== 4)
     }
   },
   methods: {
@@ -38,7 +45,9 @@ export default {
         this.item = data
       }
       this.$refs.baseModal.show()
-
+      this.$nextTick(() => {
+        this.$refs.detailCardComponent.getCountdownTimer()
+      })
       return new Promise((resolve, reject) => {
         this.promise = { resolve, reject }
       })
@@ -49,6 +58,9 @@ export default {
     },
     clearModal () {
       this.item = null
+      this.$nextTick(() => {
+        this.$refs.detailCardComponent.clearCountdownTimer()
+      })
     }
   }
 }

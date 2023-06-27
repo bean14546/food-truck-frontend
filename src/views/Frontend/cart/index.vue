@@ -5,17 +5,22 @@
         <h1 class="primary--text font-weight-regular mb-4">ตะกร้าสินค้า</h1>
       </div>
     </section>
-
-    <section id="content">
-      <div class="pt-6 px-6 mb-16">
-        <v-row>
-          <v-col v-for="(item, index) in cart" :key="index" cols="12" class="pb-0">
-            <menuCardComponent :food="item.food" :quantity="item.quantity" :total-price="item.total" :to="item.food.id" width="100%" height="100%" name-slug="detail_food_in_cart" :detail-menu="{...item, index: index}" horizontal />
-          </v-col>
-        </v-row>
+    <section v-if="cart && cart.length > 0">
+      <section id="content">
+        <div class="pt-6 px-6 mb-16">
+          <v-row>
+            <v-col v-for="(item, index) in cart" :key="index" cols="12" class="pb-0">
+              <menuCardComponent :food="item.food" :quantity="item.quantity" :total-price="item.total" :to="item.food.id" width="100%" height="100%" name-slug="detail_food_in_cart" :detail-menu="{...item, index: index}" horizontal />
+            </v-col>
+          </v-row>
+        </div>
+      </section>
+    </section>
+    <section v-else>
+      <div class="h-70vh d-flex justify-center align-center">
+        <p class="primary--text text-center mb-0"> ไม่พบอาหารในตะกร้า </p>
       </div>
     </section>
-
     <section id="navigation">
       <v-bottom-navigation class="elevation-0" fixed>
         <div class="px-6 w-100 align-self-center">
@@ -111,7 +116,7 @@ export default {
             }
             orderListToppingApi.create(orderListTopping)
           })
-        }).catch((error) =>{
+        }).catch((error) => {
           console.log('error', error)
         })
       })

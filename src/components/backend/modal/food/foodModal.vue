@@ -31,7 +31,8 @@
                 />
               </v-col>
               <v-col cols="12" sm="6" class="py-1">
-                <v-text-field v-model.number="foodObj.Food_Price" :rules="rules.Food_Price" label="ราคา" placeholder="ระบุราคา เช่น 100 เป็นต้น" />
+                <v-text-field
+                  v-model.number="foodObj.Food_Price" :rules="rules.Food_Price" label="ราคา" placeholder="ระบุราคา เช่น 100 เป็นต้น" />
               </v-col>
               <v-col cols="6" class="mb-4 mb-sm-0 py-1">
                 <v-switch
@@ -194,6 +195,7 @@ export default {
   data () {
     return {
       edit: false,
+      saveValidate: false,
       headersOption: [
         { text: 'ลำดับ', align: 'start', value: 'index', width: '5%' },
         { text: 'Option', align: 'start', value: 'Option_Name', width: '15%' },
@@ -240,7 +242,10 @@ export default {
         option: [ value => !!value || 'Required.' ],
         topping: [ value => !!value || 'Required.' ],
         ingredient: [ value => !!value || 'Required.' ],
-        amount_used: [ value => !!value || 'Required.' ]
+        amount_used: [
+          value => !!value || 'Required.'
+          // value => this.ingredientObj.quantity >= value || 'เกินกำหนด.'
+        ]
       },
 
       category: [],
@@ -268,9 +273,9 @@ export default {
   },
   mounted () {
     categoryApi.getAll().then((res) => { this.category = res.data })
-    optionApi.getAll().then((res) => { this.option = res.data })
+    optionApi.getAll().then((res) => { this.option = res.data.filter(item => item.Option_Detail.length > 0) })
     toppingApi.getAll().then((res) => { this.topping = res.data.filter(item => item.isActive === 1) })
-    ingredientApi.getAll().then((res) => { this.ingredient = res.data })
+    ingredientApi.getAll().then((res) => { this.ingredient = res.data.filter(item => item.stock.quantity > 0) })
   },
   methods: {
     show (data) {
@@ -395,8 +400,16 @@ export default {
           ingredientOld: this.itemsIngredientOld
         }
 
-        this.promise.resolve(!this.edit ? mapData : mapDataEdited)
-        this.$refs.baseModal.close()
+        // ตรวจสอบเงื่อนว่าหาก amount_used > quantity ให้แจ้ง error
+        const condition1 = mapData.ingredient.filter(item => item.amount_used >= item.quantity).length > 0
+        const condition2 = mapDataEdited.ingredientEdited.filter(item => item.amount_used >= item.stock.quantity).length > 0
+        if (!condition1 && !condition2) {
+          this.promise.resolve(!this.edit ? mapData : mapDataEdited)
+          this.saveValidate = true
+          this.$refs.baseModal.close()
+        } else {
+          this.sweatAlert({ position: this.$vuetify.breakpoint.xs ? 'top' : 'top-end', title: 'จำนวนวัตถุดิบที่ต้องใช้ต่อจาน มากกว่าจำนวนวัตถุดิบใน stock', icon: 'error' })
+        }
       }
     },
     clearModal () {
@@ -423,7 +436,10 @@ export default {
       this.edit = false
       this.$refs.upload.clearData()
       this.$refs.form.resetValidation()
-      this.$emit('reload')
+      if (!this.saveValidate) {
+        this.$emit('reload')
+      }
+      this.saveValidate = false
     }
   }
 }

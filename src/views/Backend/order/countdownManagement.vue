@@ -158,8 +158,11 @@ export default {
           } else {
             this.searchDataOnChangePage(this.$store.getters.getCurrentPage)
           }
-        }).catch((error) =>{
+          this.sweatAlert({ position: this.$vuetify.breakpoint.xs ? 'top' : 'top-end', title: 'เพิ่มข้อมูลสำเร็จ' })
+        }).catch((error) => {
           console.log('error', error)
+          this.loading = false
+          this.sweatAlert({ position: this.$vuetify.breakpoint.xs ? 'top' : 'top-end', title: 'มีบางอย่างผิดพลาด', icon: 'error' })
         })
       })
     },
@@ -172,8 +175,11 @@ export default {
           } else {
             this.searchDataOnChangePage(this.$store.getters.getCurrentPage)
           }
-        }).catch((error) =>{
+          this.sweatAlert({ position: this.$vuetify.breakpoint.xs ? 'top' : 'top-end', title: 'แก้ไขข้อมูลสำเร็จ' })
+        }).catch((error) => {
           console.log('error', error)
+          this.loading = false
+          this.sweatAlert({ position: this.$vuetify.breakpoint.xs ? 'top' : 'top-end', title: 'มีบางอย่างผิดพลาด', icon: 'error' })
         })
       })
     },
@@ -187,9 +193,11 @@ export default {
           } else {
             this.searchDataOnChangePage(this.$store.getters.getCurrentPage)
           }
-        }).catch((error) =>{
+          this.sweatAlert({ position: this.$vuetify.breakpoint.xs ? 'top' : 'top-end', title: 'ลบข้อมูลสำเร็จ' })
+        }).catch((error) => {
           console.log('error', error)
           this.loading = false
+          this.sweatAlert({ position: this.$vuetify.breakpoint.xs ? 'top' : 'top-end', title: 'มีบางอย่างผิดพลาด', icon: 'error' })
         })
       })
     },

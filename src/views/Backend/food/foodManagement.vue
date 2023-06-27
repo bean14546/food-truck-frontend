@@ -177,21 +177,24 @@ export default {
           } else {
             this.searchDataOnChangePage(this.$store.getters.getCurrentPage)
           }
-        }).catch((error) =>{
+          this.sweatAlert({ position: this.$vuetify.breakpoint.xs ? 'top' : 'top-end', title: 'เพิ่มข้อมูลสำเร็จ' })
+        }).catch((error) => {
           console.log('error', error)
           this.loading = false
+          this.sweatAlert({ position: this.$vuetify.breakpoint.xs ? 'top' : 'top-end', title: 'มีบางอย่างผิดพลาด', icon: 'error' })
         })
       })
     },
     editFood (foodObj) {
       this.$refs.foodModal.show(foodObj).then((res) => {
-        this.loading = true
         const food = res.food
         foodApi.update(foodObj.id, food).then(() => {
+          this.loading = true
           this.logicEditedFood(res, foodOptionApi, foodToppingApi, foodIngredientApi, foodObj)
-        }).catch((error) =>{
+        }).catch((error) => {
           console.log('error', error)
           this.loading = false
+          this.sweatAlert({ position: this.$vuetify.breakpoint.xs ? 'top' : 'top-end', title: 'มีบางอย่างผิดพลาด', icon: 'error' })
         })
       })
     },
@@ -265,6 +268,7 @@ export default {
       } else {
         this.searchDataOnChangePage(this.$store.getters.getCurrentPage)
       }
+      this.sweatAlert({ position: this.$vuetify.breakpoint.xs ? 'top' : 'top-end', title: 'แก้ไขข้อมูลสำเร็จ' })
     },
     deleteFood (foodObj) {
       const text = `คุณต้องการลบ "${foodObj.Food_Name}" หรือไม่`
@@ -276,9 +280,11 @@ export default {
           } else {
             this.searchDataOnChangePage(this.$store.getters.getCurrentPage)
           }
-        }).catch((error) =>{
+          this.sweatAlert({ position: this.$vuetify.breakpoint.xs ? 'top' : 'top-end', title: 'ลบข้อมูลสำเร็จ' })
+        }).catch((error) => {
           console.log('error', error)
           this.loading = false
+          this.sweatAlert({ position: this.$vuetify.breakpoint.xs ? 'top' : 'top-end', title: 'มีบางอย่างผิดพลาด', icon: 'error' })
         })
       })
     },
@@ -306,6 +312,6 @@ export default {
 }
 </script>
 
-<style>
-
+<style lang="scss" scoped>
+// ต้องมี comment เนื่องจากเชื่อมกับ scss
 </style>

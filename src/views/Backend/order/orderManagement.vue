@@ -4,8 +4,8 @@
     <section id="content">
       <v-container class="white rounded-lg pa-6">
         <v-tabs v-model="tab" class="mb-4">
-          <template v-for="(status, index) in listStatusItems" >
-            <v-tab :href="`#${index}`" :key="`${status.Order_List_Status_Name}-${index}`">
+          <template v-for="(status, index) in listStatusItems">
+            <v-tab :href="`#${index}`" :key="`order-status-${index}`" @click="selectTab(index)">
               {{ status.Order_List_Status_Name }}
             </v-tab>
           </template>
@@ -47,8 +47,8 @@
             </flexibleTable>
           </v-tab-item>
         </v-tabs-items>
-        <pagination :pageCount="lastPage" @onChangePage="changePage" no-shadow />
       </v-container>
+      <pagination :pageCount="lastPage" @onChangePage="changePage" no-shadow />
     </section>
     <checkOrderListModal ref="checkOrderListModal" />
     <countdownOrderModal ref="countdownOrderModal" />
@@ -59,8 +59,9 @@
 <script>
 // API
 import orderListApi from '@/api/orderListApi'
-// import orderListStatusApi from '@/api/orderListStatusApi'
-// import countdownApi from '@/api/countdownApi'
+import orderListStatusApi from '@/api/orderListStatusApi'
+import countdownApi from '@/api/countdownApi'
+import stockApi from '@/api/stockApi'
 // Component
 import headerLayout from '@/components/backend/layout/header'
 import flexibleTable from '@/components/backend/table/flexibleTable'
@@ -68,6 +69,7 @@ import pagination from '@/components/backend/pagination'
 import checkOrderListModal from '@/components/backend/modal/orderList/orderListManage/checkOrderList'
 import countdownOrderModal from '@/components/backend/modal/orderList/orderListManage/countdownOrderList'
 import cancelOrderListModal from '@/components/backend/modal/orderList/orderListManage/cancelOrderList'
+import { getFirestore, doc, getDoc, setDoc, updateDoc } from 'firebase/firestore/lite'
 // mixins
 import { mixins } from '@/plugins/mixins'
 export default {
@@ -134,68 +136,118 @@ export default {
     this.clear()
   },
   methods: {
-    // fetchData (pageNumber) {
-    //   this.loading = true
-    //   // Waiting Status
-    //   orderListApi.getAndCountOrderListID1(pageNumber).then((res) => {
-    //     this.itemsWaitingStatus = res.result.data
-    //     this.$store.commit('setCurrentPage', res.result.meta ? res.result.meta.current_page: res.result.current_page)
-    //     this.perPage = res.result.meta ? res.result.meta.per_page: res.result.per_page
-    //     this.total = res.result.meta ? res.result.meta.total : res.result.total
-    //     this.lastPage = res.result.meta ? res.result.meta.last_page : res.result.last_page
-    //   }).catch((err) => {
-    //     console.log('มีบางอย่างผิดพลาด', err)
-    //     this.loading = false
-    //   })
-    //   // InProgress Status
-    //   orderListApi.getAndCountOrderListID2(pageNumber).then((res) => {
-    //     this.itemsInProgressStatus = res.result.data
-    //     this.$store.commit('setCurrentPage', res.result.meta ? res.result.meta.current_page: res.result.current_page)
-    //     this.perPage = res.result.meta ? res.result.meta.per_page: res.result.per_page
-    //     this.total = res.result.meta ? res.result.meta.total : res.result.total
-    //     this.lastPage = res.result.meta ? res.result.meta.last_page : res.result.last_page
-    //   }).catch((err) => {
-    //     console.log('มีบางอย่างผิดพลาด', err)
-    //     this.loading = false
-    //   })
-    //   // Cancel Status
-    //   orderListApi.getAndCountOrderListID3(pageNumber).then((res) => {
-    //     this.itemsCancelStatus = res.result.data
-    //     this.$store.commit('setCurrentPage', res.result.meta ? res.result.meta.current_page: res.result.current_page)
-    //     this.perPage = res.result.meta ? res.result.meta.per_page: res.result.per_page
-    //     this.total = res.result.meta ? res.result.meta.total : res.result.total
-    //     this.lastPage = res.result.meta ? res.result.meta.last_page : res.result.last_page
-    //   }).catch((err) => {
-    //     console.log('มีบางอย่างผิดพลาด', err)
-    //     this.loading = false
-    //   })
-    //   // Success Status
-    //   orderListApi.getAndCountOrderListID4(pageNumber).then((res) => {
-    //     this.itemsSuccessStatus = res.result.data
-    //     this.$store.commit('setCurrentPage', res.result.meta ? res.result.meta.current_page: res.result.current_page)
-    //     this.perPage = res.result.meta ? res.result.meta.per_page: res.result.per_page
-    //     this.total = res.result.meta ? res.result.meta.total : res.result.total
-    //     this.lastPage = res.result.meta ? res.result.meta.last_page : res.result.last_page
-    //     this.loading = false
-    //   }).catch((err) => {
-    //     console.log('มีบางอย่างผิดพลาด', err)
-    //     this.loading = false
-    //   })
-
-    //   orderListStatusApi.getAll().then((res) => {
-    //     this.listStatusItems = res.data
-    //   })
-    //   countdownApi.getAll().then((res) => {
-    //     this.time = res.data
-    //   })
-    // },
+    async fetchData () {
+      this.loading = true
+      await this.fetchFilterTab(this.tab)
+      await orderListStatusApi.getAll().then((res) => {
+        this.listStatusItems = res.data
+      })
+      await countdownApi.getAll().then((res) => {
+        this.time = res.data
+        this.loading = false
+      })
+    },
+    fetchID1 (pageNumber) {
+      // Waiting Status
+      this.loading = true
+      orderListApi.getAndCountOrderListID1(pageNumber).then((res) => {
+        this.itemsWaitingStatus = res.result.data
+        this.$store.commit('setCurrentPage', res.result.meta ? res.result.meta.current_page: res.result.current_page)
+        this.perPage = res.result.meta ? res.result.meta.per_page: res.result.per_page
+        this.total = res.result.meta ? res.result.meta.total : res.result.total
+        this.lastPage = res.result.meta ? res.result.meta.last_page : res.result.last_page
+        this.loading = false
+      }).catch((err) => {
+        console.log('มีบางอย่างผิดพลาด', err)
+        this.loading = false
+      })
+    },
+    fetchID2 (pageNumber) {
+      // InProgress Status
+      this.loading = true
+      orderListApi.getAndCountOrderListID2(pageNumber).then((res) => {
+        this.itemsInProgressStatus = res.result.data
+        this.$store.commit('setCurrentPage', res.result.meta ? res.result.meta.current_page: res.result.current_page)
+        this.perPage = res.result.meta ? res.result.meta.per_page: res.result.per_page
+        this.total = res.result.meta ? res.result.meta.total : res.result.total
+        this.lastPage = res.result.meta ? res.result.meta.last_page : res.result.last_page
+        this.loading = false
+      }).catch((err) => {
+        console.log('มีบางอย่างผิดพลาด', err)
+        this.loading = false
+      })
+    },
+    fetchID3 (pageNumber) {
+      // Cancel Status
+      this.loading = true
+      orderListApi.getAndCountOrderListID3(pageNumber).then((res) => {
+        this.itemsCancelStatus = res.result.data
+        this.$store.commit('setCurrentPage', res.result.meta ? res.result.meta.current_page: res.result.current_page)
+        this.perPage = res.result.meta ? res.result.meta.per_page: res.result.per_page
+        this.total = res.result.meta ? res.result.meta.total : res.result.total
+        this.lastPage = res.result.meta ? res.result.meta.last_page : res.result.last_page
+        this.loading = false
+      }).catch((err) => {
+        console.log('มีบางอย่างผิดพลาด', err)
+        this.loading = false
+      })
+    },
+    fetchID4 (pageNumber) {
+      // Success Status
+      this.loading = true
+      orderListApi.getAndCountOrderListID4(pageNumber).then((res) => {
+        this.itemsSuccessStatus = res.result.data
+        this.$store.commit('setCurrentPage', res.result.meta ? res.result.meta.current_page: res.result.current_page)
+        this.perPage = res.result.meta ? res.result.meta.per_page: res.result.per_page
+        this.total = res.result.meta ? res.result.meta.total : res.result.total
+        this.lastPage = res.result.meta ? res.result.meta.last_page : res.result.last_page
+        this.loading = false
+      }).catch((err) => {
+        console.log('มีบางอย่างผิดพลาด', err)
+        this.loading = false
+      })
+    },
+    async selectTab (tab) {
+      await this.$store.commit('setCurrentPage', 1)
+      await this.fetchFilterTab(tab)
+    },
     checkOrder (item) {
-      this.$refs.checkOrderListModal.show(item).then(() => {
-        const checkOrder = { ...item }
-        this.$refs.countdownOrderModal.show(this.time).then((res) => {
-          console.log(checkOrder)
-          console.log(res)
-        })
+      this.$refs.checkOrderListModal.show(item).then((modalResponse) => {
+        const checkOrder = { ...modalResponse }
+        const order_list_id = checkOrder.id
+        if (item.order_list_status_id === 1) {
+          this.$refs.countdownOrderModal.show(this.time).then((res) => {
+            if (checkOrder.Ingredient && !checkOrder.Ingredient.some(item => item.quantity === 0)) {
+              checkOrder.Ingredient.forEach((item) => {
+                const stock_id = item.stock_id
+                const calculate_amount_used = { quantity: item.quantity >= item.amount_used ? item.quantity - item.amount_used : 0 }
+                stockApi.update(stock_id, calculate_amount_used)
+              })
+              const order_list_status_id = 2
+              const time_countdown_id = res.id
+              const orderListObj = { order_list_status_id, time_countdown_id }
+              orderListApi.update(order_list_id, orderListObj).then(() => {
+                this.clear()
+              })
+              // firebase countdown
+              const orderListId = order_list_id
+              const startTime = Date.now()
+              const countdownDuration = (res.time * 60) * 1000 // หน่วยเป็ย มิลลิวินาที
+              this.startCountdown(orderListId, startTime, countdownDuration)
+              this.sweatAlert({ position: this.$vuetify.breakpoint.xs ? 'top' : 'top-end', title: 'รับออร์เดอร์นี้แล้ว' })
+            } else {
+              this.sweatAlert({ position: this.$vuetify.breakpoint.xs ? 'top' : 'top-end', icon: 'error', title: 'วัตถุดิบหมด กรุณากดยกเลิกออร์เดอร์นี้!!!' })
+            }
+          })
+        } else if (item.order_list_status_id === 2) {
+          const order_list_status_id = 4
+          const orderListObj = { order_list_status_id }
+          orderListApi.update(order_list_id, orderListObj).then(() => {
+            this.clear()
+          }).then(() => {
+            this.sweatAlert({ position: this.$vuetify.breakpoint.xs ? 'top' : 'top-end', title: 'ทำอาหารเสร็จสิ้น' })
+          })
+        }
       })
     },
     cancelOrder (item) {
@@ -204,9 +256,11 @@ export default {
         const orderListObj = { ...item, order_list_status_id: 3, Chef_Note: res }
         orderListApi.update(orderListObj.id ,orderListObj).then(() => {
           this.fetchData()
-        }).catch((error) =>{
+          this.sweatAlert({ position: this.$vuetify.breakpoint.xs ? 'top' : 'top-end', title: 'ยกเลิกออร์เดอร์สำเร็จ' })
+        }).catch((error) => {
           console.log('error', error)
           this.loading = false
+          this.sweatAlert({ position: this.$vuetify.breakpoint.xs ? 'top' : 'top-end', title: 'มีบางอย่างผิดพลาด', icon: 'error' })
         })
       })
     },
@@ -228,18 +282,68 @@ export default {
       }
       return status
     },
+    fetchFilterTab (tab) {
+      if (Number(tab) === 0) {
+        this.fetchID1(this.$store.getters.getCurrentPage)
+      } else if (Number(tab) === 1) {
+        this.fetchID2(this.$store.getters.getCurrentPage)
+      } else if (Number(tab) === 2) {
+        this.fetchID3(this.$store.getters.getCurrentPage)
+      } else {
+        this.fetchID4(this.$store.getters.getCurrentPage)
+      }
+    },
     changePage (event) {
       this.$store.commit('setCurrentPage', event)
-      this.fetchData(this.$store.getters.getCurrentPage)
+      this.fetchFilterTab(this.tab)
     },
     clear () {
       this.$store.commit('setCurrentPage', 1)
       this.fetchData(this.$store.getters.getCurrentPage)
+    },
+    async startCountdown (orderListId, startTime, countdownDuration) {
+      const db = await getFirestore()
+      const countdownRef = await doc(db, 'orders', orderListId.toString())
+      await setDoc(countdownRef, {
+        order_id: orderListId,
+        start_time: startTime,
+        countdown_duration: countdownDuration
+      })
+
+      // สร้าง interval เพื่ออัปเดตค่าเวลาในเอกสารทุกๆ 1 วินาที
+      const intervalId = await setInterval(() => {
+        getDoc(countdownRef).then((doc) => {
+          if (doc.exists) {
+            const data = doc.data()
+            const currentTime = Date.now()
+            const startTime = data && data.start_time ? data.start_time : 0
+            const countdownDuration = data && data.countdown_duration ? data.countdown_duration : 0
+            const elapsedTime = currentTime - startTime
+
+            // คำนวณเวลาที่เหลือใน countdown
+            const remainingTime = Math.max(countdownDuration - elapsedTime, 0)
+
+            // อัปเดตค่าเวลาในเอกสาร
+            updateDoc(countdownRef, { remaining_time: remainingTime })
+
+            // หยุด interval เมื่อ countdown เสร็จสิ้น
+            if (remainingTime <= 0) {
+              clearInterval(intervalId)
+            }
+          }
+        })
+      }, 10000) // อัปเดตทุกๆ 1 วินาที
     }
   }
 }
 </script>
 
-<style lang="scss" scoped>
+<style lang="scss">
 // ต้องมี comment เนื่องจากเชื่อมกับ scss
+.v-tabs:not(.v-tabs--vertical):not(.v-tabs--right) >
+.v-slide-group--is-overflowing.v-tabs-bar--is-mobile:not(.v-slide-group--has-affixes) >
+.v-slide-group__prev {
+  display: none;
+  visibility: hidden;
+}
 </style>

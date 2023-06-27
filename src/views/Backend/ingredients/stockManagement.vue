@@ -91,7 +91,6 @@ export default {
     },
     async addStock () {
       try {
-        this.loading = true
         const modalResponse = await this.$refs.stockModal.show()
         const stockDateGetAllResponse = await stockDateApi.getAll()
         const stockDateAllData = stockDateGetAllResponse.data
@@ -114,7 +113,9 @@ export default {
                 stock_date_id: stock_date_id,
                 quantity: element.quantity
               }
-              await logDateStockApi.create(logDateStockObj)
+              await logDateStockApi.create(logDateStockObj).then(() => {
+                this.sweatAlert({ position: this.$vuetify.breakpoint.xs ? 'top' : 'top-end', title: 'เพิ่มข้อมูลสำเร็จ' })
+              })
             }))
           }
           // แต่ถ้ามีวันที่ใน stock_date แต่ในนั้นไม่มีวันที่ที่กำลังจะเพิ่มเข้าไป
@@ -129,7 +130,9 @@ export default {
                 stock_date_id: res.data.id,
                 quantity: element.quantity
               }
-              await logDateStockApi.create(logDateStockObj)
+              await logDateStockApi.create(logDateStockObj).then(() => {
+                this.sweatAlert({ position: this.$vuetify.breakpoint.xs ? 'top' : 'top-end', title: 'เพิ่มข้อมูลสำเร็จ' })
+              })
             }))
           }
         }
@@ -145,20 +148,23 @@ export default {
               stock_date_id: res.data.id,
               quantity: element.quantity
             }
-            await logDateStockApi.create(logDateStockObj)
+            await logDateStockApi.create(logDateStockObj).then(() => {
+              this.sweatAlert({ position: this.$vuetify.breakpoint.xs ? 'top' : 'top-end', title: 'เพิ่มข้อมูลสำเร็จ' })
+            })
           }))
         }
         await this.fetchData(1)
       } catch (error) {
         console.log('error', error)
         this.loading = false
+        this.sweatAlert({ position: this.$vuetify.breakpoint.xs ? 'top' : 'top-end', title: 'มีบางอย่างผิดพลาด', icon: 'error' })
       }
     },
     checkStock (data) {
       logDateStockApi.getAll().then((res) => {
         const responseFilters = res.data.filter(item => item.date.stock_date_id === data.id)
         this.$refs.stockModal.show(responseFilters)
-      }).catch((error) =>{
+      }).catch((error) => {
         console.log('error', error)
       })
     },
@@ -174,6 +180,6 @@ export default {
 }
 </script>
 
-<style>
-
+<style lang="scss" scoped>
+// ต้องมี comment เนื่องจากเชื่อมกับ scss
 </style>

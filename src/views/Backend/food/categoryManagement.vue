@@ -65,6 +65,7 @@ import categoryModal from '@/components/backend/modal/food/categoryModal'
 import confirmModal from '@/components/backend/modal/confirm'
 // mixins
 import { mixins } from '@/plugins/mixins'
+import foodApi from '@/api/foodApi'
 export default {
   name: 'FoodCategoryManagementPage',
   components: {
@@ -160,9 +161,11 @@ export default {
           } else {
             this.searchDataOnChangePage(this.$store.getters.getCurrentPage)
           }
-        }).catch((error) =>{
+          this.sweatAlert({ position: this.$vuetify.breakpoint.xs ? 'top' : 'top-end', title: 'เพิ่มข้อมูลสำเร็จ' })
+        }).catch((error) => {
           console.log('error', error)
           this.loading = false
+          this.sweatAlert({ position: this.$vuetify.breakpoint.xs ? 'top' : 'top-end', title: 'มีบางอย่างผิดพลาด', icon: 'error' })
         })
       })
     },
@@ -175,25 +178,42 @@ export default {
           } else {
             this.searchDataOnChangePage(this.$store.getters.getCurrentPage)
           }
-        }).catch((error) =>{
+          this.sweatAlert({ position: this.$vuetify.breakpoint.xs ? 'top' : 'top-end', title: 'แก้ไขข้อมูลสำเร็จ' })
+        }).catch((error) => {
           console.log('error', error)
           this.loading = false
+          this.sweatAlert({ position: this.$vuetify.breakpoint.xs ? 'top' : 'top-end', title: 'มีบางอย่างผิดพลาด', icon: 'error' })
         })
       })
     },
     deleteCategory (categoryObj) {
       const text = `คุณต้องการลบ "${categoryObj.Category_Name}" หรือไม่`
-      this.$refs.confirmModal.show(categoryObj, text).then((res) => {
+      this.$refs.confirmModal.show(categoryObj, text).then((modalResponse) => {
         this.loading = true
-        categoryApi.delete(res.id).then(() => {
-          if (!this.search) {
-            this.fetchData(this.$store.getters.getCurrentPage)
+        foodApi.getAll().then((apiResponse) => {
+          // เช็คว่าหมวดหมู่ของวัตถุดิบมีการผูกข้มูลกับวัตถุดิบสำหรับทำอาหารหรือไม่ ถ้ามีจะไม่สามารถลบได้
+          const condition = apiResponse.data.filter(item => item.Category.id === modalResponse.id).length > 0
+          if (!condition) {
+            categoryApi.delete(modalResponse.id).then(() => {
+              if (!this.search) {
+                this.fetchData(this.$store.getters.getCurrentPage)
+              } else {
+                this.searchDataOnChangePage(this.$store.getters.getCurrentPage)
+              }
+              this.sweatAlert({ position: this.$vuetify.breakpoint.xs ? 'top' : 'top-end', title: 'ลบข้อมูลสำเร็จ' })
+            }).catch((error) => {
+              console.log('error', error)
+              this.loading = false
+              this.sweatAlert({ position: this.$vuetify.breakpoint.xs ? 'top' : 'top-end', title: 'มีบางอย่างผิดพลาด', icon: 'error' })
+            })
           } else {
-            this.searchDataOnChangePage(this.$store.getters.getCurrentPage)
+            this.sweatAlert({ position: this.$vuetify.breakpoint.xs ? 'top' : 'top-end', title: 'ไม่สามารถลบข้อมูลได้ เนื่องจากหมวดหมู่นี้ผูกกับอาหารอยู่ ดังนั้นกรุณาลบอาหารก่อน', icon: 'error' })
+            this.loading = false
           }
-        }).catch((error) =>{
+        }).catch((error) => {
           console.log('error', error)
           this.loading = false
+          this.sweatAlert({ position: this.$vuetify.breakpoint.xs ? 'top' : 'top-end', title: 'มีบางอย่างผิดพลาด', icon: 'error' })
         })
       })
     },
@@ -214,6 +234,6 @@ export default {
 }
 </script>
 
-<style>
-
+<style lang="scss" scoped>
+// ต้องมี comment เนื่องจากเชื่อมกับ scss
 </style>

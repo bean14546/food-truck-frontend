@@ -1,11 +1,6 @@
 <template>
   <div>
-    <div v-if="loading" class="d-flex justify-center align-center h-100vh">
-      <v-progress-circular
-        indeterminate
-        color="primary"
-      />
-    </div>
+    <progressLoaderComponent v-if="loading" fullScreen />
     <div v-else>
       <section id="header">
         <v-card class="secondary" elevation="0">
@@ -89,12 +84,13 @@
 <script>
 // components
 import menuCardComponent from '@/components/card/menuCard.vue'
+import progressLoaderComponent from '@/components/progressLoader'
 // API
 import foodApi from '@/api/foodApi'
 import categoryApi from '@/api/categoryApi'
 export default {
   name: 'FoodPage',
-  components: { menuCardComponent },
+  components: { progressLoaderComponent, menuCardComponent },
   data () {
     return {
       loading: true,
@@ -111,10 +107,10 @@ export default {
   methods: {
     async fetchData () {
       this.loading = true
-      foodApi.getAll().then((res) => {
+      await foodApi.getAll().then((res) => {
         this.food = res.data
       })
-      categoryApi.getAll().then((res) => {
+      await categoryApi.getAll().then((res) => {
         this.category = [{ id: 0, Category_Name: 'ทั้งหมด' }, ...res.data]
         this.loading = false
       })

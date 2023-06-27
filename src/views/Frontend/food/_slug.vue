@@ -1,11 +1,6 @@
 <template>
   <div>
-    <div v-if="loading" class="h-100vh d-flex justify-center align-center">
-      <v-progress-circular
-        indeterminate
-        color="primary"
-      />
-    </div>
+    <progressLoaderComponent v-if="loading" fullScreen />
     <div v-else>
       <section id="header" v-if="food">
         <v-card elevation="0">
@@ -22,8 +17,8 @@
             </v-card-text>
           </div>
         </v-card>
+        <v-divider class="grey mx-4" />
       </section>
-      <v-divider class="grey mx-4" />
 
       <section id="switch">
         <v-switch v-model.number="isTakeaway" class="px-6 pt-0" :true-value="1" :false-value="0" hide-details>
@@ -57,8 +52,8 @@
             </v-form>
           </template>
         </div>
+        <v-divider class="grey mx-4" />
       </section>
-      <v-divider class="grey mx-4" />
 
       <section id="topping" v-if="food.Topping && food.Topping.length > 0">
         <div class="px-6 pt-4">
@@ -79,8 +74,8 @@
             </template>
           </v-checkbox>
         </div>
+        <v-divider class="grey mx-4" />
       </section>
-      <v-divider class="grey mx-4" />
 
       <section id="more-details">
         <div class="mb-16 px-6 pt-4">
@@ -125,8 +120,13 @@
 <script>
 // API
 import foodApi from '@/api/foodApi'
+// Commponent
+import progressLoaderComponent from '@/components/progressLoader'
 export default {
   name: 'FoodSlugPage',
+  components: {
+    progressLoaderComponent
+  },
   data () {
     return {
       loading: true,

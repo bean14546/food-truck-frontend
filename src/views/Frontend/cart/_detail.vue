@@ -1,13 +1,14 @@
 <template>
   <div>
-    <section id="header" class="px-6 pt-6 pb-0">
-      <h1 class="primary--text font-weight-regular">ตรวจสอบรายการอาหาร</h1>
-    </section>
-    <section id="body" class="mb-16 px-6 pt-6 pb-6">
-      <detailCardComponent :items="items" />
-    </section>
-    <section id="navigation">
-      <v-bottom-navigation class="d-flex flex-column elevation-0 px-5" height="100px" color="primary" fixed >
+    <section v-if="items">
+      <section id="header" class="px-6 pt-6 pb-0">
+        <h1 class="primary--text font-weight-regular">ตรวจสอบรายการอาหาร</h1>
+      </section>
+      <section id="body" class="mb-16 px-6 pt-6 pb-6">
+        <detailCardComponent :items="items" />
+      </section>
+      <section id="navigation">
+        <v-bottom-navigation class="d-flex flex-column elevation-0 px-5" height="100px" color="primary" fixed >
           <div class="d-flex justify-center align-center w-100">
             <v-btn
               color="secondary"
@@ -18,7 +19,13 @@
               <span class="dark--text text-subtitle-1 font-weight-regular"> ยกเลิกเมนูนี้ </span>
             </v-btn>
           </div>
-      </v-bottom-navigation>
+        </v-bottom-navigation>
+      </section>
+    </section>
+    <section v-else>
+      <div class="h-100vh d-flex justify-center align-center">
+        <p class="primary--text text-center mb-0"> ไม่พบข้อมูล </p>
+      </div>
     </section>
   </div>
 </template>
