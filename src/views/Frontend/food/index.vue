@@ -82,12 +82,12 @@
 </template>
 
 <script>
-// components
-import menuCardComponent from '@/components/card/menuCard.vue'
-import progressLoaderComponent from '@/components/progressLoader'
 // API
 import foodApi from '@/api/foodApi'
 import categoryApi from '@/api/categoryApi'
+// components
+import menuCardComponent from '@/components/card/menuCard.vue'
+import progressLoaderComponent from '@/components/progressLoader'
 export default {
   name: 'FoodPage',
   components: { progressLoaderComponent, menuCardComponent },
