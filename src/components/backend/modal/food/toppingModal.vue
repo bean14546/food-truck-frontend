@@ -44,8 +44,7 @@ export default {
       edit: false,
       toppingRules: {
         Topping_Name: [ value => !!value || 'Required.' ],
-        Topping_Price: [ value => !!value || 'Required.' ],
-        isActive: [ value => !!value || 'Required.' ]
+        Topping_Price: [ value => !!value || 'Required.' ]
       },
       toppingObj: {
         Topping_Name: '',

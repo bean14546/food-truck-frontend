@@ -52,12 +52,16 @@
 </template>
 
 <script>
+// API
 import optionApi from '@/api/optionApi'
+import optionDetailApi from '@/api/optionDetailApi'
+// Component
 import headerLayout from '@/components/backend/layout/header'
 import flexibleTable from '@/components/backend/table/flexibleTable'
 import pagination from '@/components/backend/pagination'
-import confirmModal from '@/components/backend/modal/confirm'
 import optionModal from '@/components/backend/modal/food/options/optionModal'
+import confirmModal from '@/components/backend/modal/confirm'
+// mixins
 import { mixins } from '@/plugins/mixins'
 export default {
   name: 'OptionManagementPage',
@@ -65,8 +69,8 @@ export default {
     headerLayout,
     flexibleTable,
     pagination,
-    confirmModal,
-    optionModal
+    optionModal,
+    confirmModal
   },
   mixins:[mixins],
   data () {
@@ -145,42 +149,67 @@ export default {
     },
     addOption () {
       this.$refs.optionModal.show().then((res) => {
+        this.loading = true
         optionApi.create(res).then(() => {
           if (!this.search) {
             this.fetchData(this.$store.getters.getCurrentPage)
           } else {
             this.searchDataOnChangePage(this.$store.getters.getCurrentPage)
           }
-        }).catch((error) =>{
+          this.sweatAlert({ position: this.$vuetify.breakpoint.xs ? 'top' : 'top-end', title: 'เพิ่มข้อมูลสำเร็จ' })
+        }).catch((error) => {
           console.log('error', error)
+          this.loading = false
+          this.sweatAlert({ position: this.$vuetify.breakpoint.xs ? 'top' : 'top-end', title: 'มีบางอย่างผิดพลาด', icon: 'error' })
         })
       })
     },
     editOption (optionObj) {
       this.$refs.optionModal.show(optionObj).then((res) => {
+        this.loading = true
         optionApi.update(optionObj.id, res).then(() => {
           if (!this.search) {
             this.fetchData(this.$store.getters.getCurrentPage)
           } else {
             this.searchDataOnChangePage(this.$store.getters.getCurrentPage)
           }
-        }).catch((error) =>{
+          this.sweatAlert({ position: this.$vuetify.breakpoint.xs ? 'top' : 'top-end', title: 'แก้ไขข้อมูลสำเร็จ' })
+        }).catch((error) => {
           console.log('error', error)
+          this.loading = false
+          this.sweatAlert({ position: this.$vuetify.breakpoint.xs ? 'top' : 'top-end', title: 'มีบางอย่างผิดพลาด', icon: 'error' })
         })
       })
     },
     deleteOption (optionObj) {
-      const text = `คุณต้องการลบ${optionObj.Option_Name}หรือไม่`
-      this.$refs.confirmModal.show(optionObj, text).then((res) => {
-        optionApi.delete(res.id).then(() => {
-          if (!this.search) {
-            this.fetchData(this.$store.getters.getCurrentPage)
+      const text = `คุณต้องการลบ "${optionObj.Option_Name}" หรือไม่`
+      this.$refs.confirmModal.show(optionObj, text).then((modalResponse) => {
+        this.loading = true
+        optionDetailApi.getAll().then((apiResponse) => {
+          // เช็คว่า Option มีการผูกข้มูลกับ Option Detail หรือไม่ ถ้ามีจะไม่สามารถลบได้
+          const condition = apiResponse.data.filter(item => item.option_id === modalResponse.id).length > 0
+          if (!condition) {
+            optionApi.delete(modalResponse.id).then(() => {
+              if (!this.search) {
+                this.fetchData(this.$store.getters.getCurrentPage)
+              } else {
+                this.searchDataOnChangePage(this.$store.getters.getCurrentPage)
+              }
+              this.sweatAlert({ position: this.$vuetify.breakpoint.xs ? 'top' : 'top-end', title: 'ลบข้อมูลสำเร็จ' })
+            }).catch((error) => {
+              console.log('error', error)
+              this.loading = false
+              this.sweatAlert({ position: this.$vuetify.breakpoint.xs ? 'top' : 'top-end', title: 'มีบางอย่างผิดพลาด', icon: 'error' })
+            })
           } else {
-            this.searchDataOnChangePage(this.$store.getters.getCurrentPage)
+            this.sweatAlert({ position: this.$vuetify.breakpoint.xs ? 'top' : 'top-end', title: 'ไม่สามารถลบข้อมูลได้ เนื่องจาก Option นี้ผูกกับรายละเอียด Option อยู่ ดังนั้นกรุณาลบรายละเอียด Option ก่อน', icon: 'error' })
+            this.loading = false
           }
-        }).catch((error) =>{
-          console.log('error', error)
         })
+      }).catch((error) => {
+        console.log('error', error)
+        this.loading = false
+        this.sweatAlert({ position: this.$vuetify.breakpoint.xs ? 'top' : 'top-end', title: 'มีบางอย่างผิดพลาด', icon: 'error' })
       })
     },
     changePage (event) {

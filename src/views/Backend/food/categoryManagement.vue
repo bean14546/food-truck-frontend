@@ -49,27 +49,31 @@
       </v-container>
       <pagination :pageCount="lastPage" @onChangePage="changePage" no-shadow />
     </section>
-    <confirmModal ref="confirmModal" icon="mdi-trash-can" />
     <categoryModal ref="categoryModal" />
+    <confirmModal ref="confirmModal" icon="mdi-trash-can" />
   </div>
 </template>
 
 <script>
+// API
 import categoryApi from '@/api/categoryApi'
+// Component
 import headerLayout from '@/components/backend/layout/header'
 import flexibleTable from '@/components/backend/table/flexibleTable'
 import pagination from '@/components/backend/pagination'
-import confirmModal from '@/components/backend/modal/confirm'
 import categoryModal from '@/components/backend/modal/food/categoryModal'
+import confirmModal from '@/components/backend/modal/confirm'
+// mixins
 import { mixins } from '@/plugins/mixins'
+import foodApi from '@/api/foodApi'
 export default {
   name: 'FoodCategoryManagementPage',
   components: {
     headerLayout,
     flexibleTable,
     pagination,
-    confirmModal,
-    categoryModal
+    categoryModal,
+    confirmModal
   },
   mixins:[mixins],
   data () {
@@ -150,41 +154,66 @@ export default {
     },
     addCategory () {
       this.$refs.categoryModal.show().then((res) => {
+        this.loading = true
         categoryApi.create(res).then(() => {
           if (!this.search) {
             this.fetchData(this.$store.getters.getCurrentPage)
           } else {
             this.searchDataOnChangePage(this.$store.getters.getCurrentPage)
           }
-        }).catch((error) =>{
+          this.sweatAlert({ position: this.$vuetify.breakpoint.xs ? 'top' : 'top-end', title: 'เพิ่มข้อมูลสำเร็จ' })
+        }).catch((error) => {
           console.log('error', error)
+          this.loading = false
+          this.sweatAlert({ position: this.$vuetify.breakpoint.xs ? 'top' : 'top-end', title: 'มีบางอย่างผิดพลาด', icon: 'error' })
         })
       })
     },
     editCategory (categoryObj) {
       this.$refs.categoryModal.show(categoryObj).then((res) => {
+        this.loading = true
         categoryApi.update(categoryObj.id, res).then(() => {
           if (!this.search) {
             this.fetchData(this.$store.getters.getCurrentPage)
           } else {
             this.searchDataOnChangePage(this.$store.getters.getCurrentPage)
           }
-        }).catch((error) =>{
+          this.sweatAlert({ position: this.$vuetify.breakpoint.xs ? 'top' : 'top-end', title: 'แก้ไขข้อมูลสำเร็จ' })
+        }).catch((error) => {
           console.log('error', error)
+          this.loading = false
+          this.sweatAlert({ position: this.$vuetify.breakpoint.xs ? 'top' : 'top-end', title: 'มีบางอย่างผิดพลาด', icon: 'error' })
         })
       })
     },
     deleteCategory (categoryObj) {
-      const text = `คุณต้องการลบ${categoryObj.Category_Name}หรือไม่`
-      this.$refs.confirmModal.show(categoryObj, text).then((res) => {
-        categoryApi.delete(res.id).then(() => {
-          if (!this.search) {
-            this.fetchData(this.$store.getters.getCurrentPage)
+      const text = `คุณต้องการลบ "${categoryObj.Category_Name}" หรือไม่`
+      this.$refs.confirmModal.show(categoryObj, text).then((modalResponse) => {
+        this.loading = true
+        foodApi.getAll().then((apiResponse) => {
+          // เช็คว่าหมวดหมู่ของวัตถุดิบมีการผูกข้มูลกับวัตถุดิบสำหรับทำอาหารหรือไม่ ถ้ามีจะไม่สามารถลบได้
+          const condition = apiResponse.data.filter(item => item.Category.id === modalResponse.id).length > 0
+          if (!condition) {
+            categoryApi.delete(modalResponse.id).then(() => {
+              if (!this.search) {
+                this.fetchData(this.$store.getters.getCurrentPage)
+              } else {
+                this.searchDataOnChangePage(this.$store.getters.getCurrentPage)
+              }
+              this.sweatAlert({ position: this.$vuetify.breakpoint.xs ? 'top' : 'top-end', title: 'ลบข้อมูลสำเร็จ' })
+            }).catch((error) => {
+              console.log('error', error)
+              this.loading = false
+              this.sweatAlert({ position: this.$vuetify.breakpoint.xs ? 'top' : 'top-end', title: 'มีบางอย่างผิดพลาด', icon: 'error' })
+            })
           } else {
-            this.searchDataOnChangePage(this.$store.getters.getCurrentPage)
+            this.sweatAlert({ position: this.$vuetify.breakpoint.xs ? 'top' : 'top-end', title: 'ไม่สามารถลบข้อมูลได้ เนื่องจากหมวดหมู่นี้ผูกกับอาหารอยู่ ดังนั้นกรุณาลบอาหารก่อน', icon: 'error' })
+            this.loading = false
           }
-        }).catch((error) =>{
+        }).catch((error) => {
           console.log('error', error)
+          this.loading = false
+          this.sweatAlert({ position: this.$vuetify.breakpoint.xs ? 'top' : 'top-end', title: 'มีบางอย่างผิดพลาด', icon: 'error' })
         })
       })
     },
@@ -205,6 +234,6 @@ export default {
 }
 </script>
 
-<style>
-
+<style lang="scss" scoped>
+// ต้องมี comment เนื่องจากเชื่อมกับ scss
 </style>

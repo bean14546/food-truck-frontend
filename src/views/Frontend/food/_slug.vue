@@ -1,115 +1,135 @@
 <template>
   <div>
-    <section id="header" v-if="food">
-      <v-card elevation="0">
-        <v-img :src="food.Food_Image" aspect-ratio="1.5" />
-        <div class="px-2">
-          <v-card-title class="d-flex justify-space-between primary--text font-weight-bold pb-2">
-            <span> {{ food.Food_Name }} </span>
-            <span> {{ food.Food_Price }} บาท </span>
-          </v-card-title>
-          <v-card-text>
-            <p class="text-center darkGrey--text mb-0 px-4">
-              {{ food.Food_Description }}
-            </p>
-          </v-card-text>
-        </div>
-      </v-card>
-    </section>
-    <v-divider class="grey mx-4" />
+    <progressLoaderComponent v-if="loading" fullScreen />
+    <div v-else>
+      <section id="header" v-if="food">
+        <v-card elevation="0">
+          <v-img :src="food.Food_Image" aspect-ratio="1.5" />
+          <div class="px-2">
+            <v-card-title class="d-flex justify-space-between primary--text font-weight-bold pb-2">
+              <span> {{ food.Food_Name }} </span>
+              <span> {{ food.Food_Price }} บาท </span>
+            </v-card-title>
+            <v-card-text>
+              <p class="text-center darkGrey--text mb-0 px-4">
+                {{ food.Food_Description }}
+              </p>
+            </v-card-text>
+          </div>
+        </v-card>
+        <v-divider class="grey mx-4" />
+      </section>
 
-    <section id="options" v-if="food.Option && food.Option.length > 0">
-      <div v-for="(option, optionIndex) in food.Option" :key="`${optionIndex}-option`" class="px-6 pt-4">
-        <p class="primary--text font-weight-bold"> {{ option.Option_Name }} </p>
-        <v-form ref="form">
-          <v-radio-group hide-details :rules="optionRules" @change="selectOption">
-            <v-radio
-              v-for="(option_detail, optionDetailIndex) in option.option_details"
-              :key="`${optionDetailIndex}-option_details`"
-              :value="option_detail"
-              class="mb-4"
-            >
-              <template #label>
-                <div class="d-flex justify-space-between w-100">
-                  <span>{{ option_detail.Option_Detail_Name }}</span>
-                  <span>{{ option_detail.Option_Detail_Price > 0 ? option_detail.Option_Detail_Price + ' บาท' : 'ฟรี' }}</span>
-                </div>
-              </template>
-            </v-radio>
-          </v-radio-group>
-        </v-form>
-      </div>
-    </section>
-    <v-divider class="grey mx-4" />
-    <section id="topping" v-if="food.Topping && food.Topping.length > 0">
-      <div class="px-6 pt-4">
-        <p class="primary--text font-weight-bold"> เครื่องเคียง </p>
-        <v-checkbox
-          v-for="(topping, index) in food.Topping"
-          :key="`${index}-toppings`"
-          :value="topping"
-          v-model="toppingSelected"
-          class="mb-4"
-          hide-details
-        >
+      <section id="switch">
+        <v-switch v-model.number="isTakeaway" class="px-6 pt-0" :true-value="1" :false-value="0" hide-details>
           <template #label>
-            <div class="d-flex justify-space-between w-100">
-              <span>{{ topping.Topping_Name }}</span>
-              <span>{{ topping.Topping_Price > 0 ? topping.Topping_Price + ' บาท' : 'ฟรี' }}</span>
-            </div>
+            <v-spacer />
+            <p class="mb-0">ห่อกลับบ้าน</p>
           </template>
-        </v-checkbox>
-      </div>
-    </section>
-    <v-divider class="grey mx-4" />
+        </v-switch>
+      </section>
 
-    <section id="more-details">
-      <div class="mb-16 px-6 pt-4">
-        <p class="primary--text font-weight-bold"> รายละเอียดเพิ่มเติม </p>
-        <v-text-field
-          v-model="note"
-          label="รายละเอียดเพิ่มเติม"
-          placeholder="กรอกรายละเอียดเพิ่มเติมของคุณที่นี่"
-          outlined
-          hide-details
-        />
-      </div>
-    </section>
+      <section id="options" v-if="food.Option && food.Option.length > 0">
+        <div v-for="(option, optionIndex) in food.Option" :key="`${optionIndex}-option`" :class="!(option.option_details.every(item => item.isActive === 0)) ? 'px-6 pt-4' : ''">
+          <template v-if="!(option.option_details.every(item => item.isActive === 0))">
+            <p class="primary--text font-weight-bold"> {{ option.Option_Name }} </p>
+            <v-form ref="form">
+              <v-radio-group hide-details :rules="optionRules" @change="selectOption">
+                <v-radio
+                  v-for="(option_detail, optionDetailIndex) in option.option_details.filter(item => item.isActive === 1)"
+                  :key="`${optionDetailIndex}-option_details`"
+                  :value="option_detail"
+                  class="mb-4"
+                >
+                  <template #label>
+                    <div class="d-flex justify-space-between w-100">
+                      <span>{{ option_detail.Option_Detail_Name }}</span>
+                      <span>{{ option_detail.Option_Detail_Price > 0 ? option_detail.Option_Detail_Price + ' บาท' : 'ฟรี' }}</span>
+                    </div>
+                  </template>
+                </v-radio>
+              </v-radio-group>
+            </v-form>
+          </template>
+        </div>
+        <v-divider class="grey mx-4" />
+      </section>
 
-    <section id="navigation">
-      <v-bottom-navigation class="elevation-0 px-5" color="primary" fixed >
-          <div class="d-flex justify-center align-center mr-3">
-            <v-btn class="btn-plus" color="primary" height="36px" width="36px" x-small :disabled="this.quantity <= 1" @click="reduce">
-              <v-icon class="white--text">mdi-minus</v-icon>
-            </v-btn>
-            <p class="quantity black--text text-subtitle-1 font-weight-regular text-center mr-4 mb-0 ml-4"> {{ quantity }} </p>
-            <v-btn class="btn-minus" color="primary" height="36px" width="36px" x-small @click="increase">
-              <v-icon class="white--text">mdi-plus</v-icon>
-            </v-btn>
-          </div>
-          <div class="d-flex justify-center align-center w-100 ml-3">
-            <v-btn
-              color="primary"
-              class="rounded"
-              block
-              @click="order"
-            >
-              <span class="white--text text-subtitle-1 font-weight-regular"> รวม {{ total }} บาท </span>
-            </v-btn>
-          </div>
-      </v-bottom-navigation>
-    </section>
+      <section id="topping" v-if="food.Topping && food.Topping.length > 0">
+        <div class="px-6 pt-4">
+          <p class="primary--text font-weight-bold"> เครื่องเคียง </p>
+          <v-checkbox
+            v-for="(topping, index) in food.Topping"
+            :key="`${index}-toppings`"
+            :value="topping"
+            v-model="toppingSelected"
+            class="mb-4"
+            hide-details
+          >
+            <template #label>
+              <div class="d-flex justify-space-between w-100">
+                <span>{{ topping.Topping_Name }}</span>
+                <span>{{ topping.Topping_Price > 0 ? topping.Topping_Price + ' บาท' : 'ฟรี' }}</span>
+              </div>
+            </template>
+          </v-checkbox>
+        </div>
+        <v-divider class="grey mx-4" />
+      </section>
+
+      <section id="more-details">
+        <div class="mb-16 px-6 pt-4">
+          <p class="primary--text font-weight-bold"> รายละเอียดเพิ่มเติม </p>
+          <v-text-field
+            v-model="note"
+            label="รายละเอียดเพิ่มเติม"
+            placeholder="กรอกรายละเอียดเพิ่มเติมของคุณที่นี่"
+            outlined
+            hide-details
+          />
+        </div>
+      </section>
+
+      <section id="navigation">
+        <v-bottom-navigation class="elevation-0 px-5" color="primary" fixed >
+            <div class="d-flex justify-center align-center mr-3">
+              <v-btn class="btn-plus" color="primary" height="36px" width="36px" x-small :disabled="this.quantity <= 1" @click="reduce">
+                <v-icon class="white--text">mdi-minus</v-icon>
+              </v-btn>
+              <p class="quantity black--text text-subtitle-1 font-weight-regular text-center mr-4 mb-0 ml-4"> {{ quantity }} </p>
+              <v-btn class="btn-minus" color="primary" height="36px" width="36px" x-small @click="increase">
+                <v-icon class="white--text">mdi-plus</v-icon>
+              </v-btn>
+            </div>
+            <div class="d-flex justify-center align-center w-100 ml-3">
+              <v-btn
+                color="primary"
+                class="rounded"
+                block
+                @click="order"
+              >
+                <span class="white--text text-subtitle-1 font-weight-regular"> รวม {{ total }} บาท </span>
+              </v-btn>
+            </div>
+        </v-bottom-navigation>
+      </section>
+    </div>
   </div>
 </template>
 
 <script>
 // API
 import foodApi from '@/api/foodApi'
-// import toppingApi from '@/api/toppingApi'
+// Commponent
+import progressLoaderComponent from '@/components/progressLoader'
 export default {
   name: 'FoodSlugPage',
+  components: {
+    progressLoaderComponent
+  },
   data () {
     return {
+      loading: true,
       food: {
         id: 14,
         Food_Name: null,
@@ -120,11 +140,11 @@ export default {
         Category: [],
         Option: []
       },
-      toppings: [],
-      quantity: 1,
       optionSelected: [],
       toppingSelected: [],
       note: '',
+      isTakeaway: 0,
+      quantity: 1,
       // Rules
       optionRules: [v => !!v]
     }
@@ -142,12 +162,11 @@ export default {
   },
   methods: {
     fetchData () {
+      this.loading = true
       foodApi.getOne(this.$route.params._slug).then((res) => {
         this.food = res.data
+        this.loading = false
       })
-      // toppingApi.getAll().then((res)=>{
-      //   this.toppings = res.result.data
-      // })
     },
     reduce () {
       if (this.quantity > 1) {
@@ -158,7 +177,7 @@ export default {
       this.quantity += 1
     },
     selectOption (option) {
-      // เช็คว่าใน array optionSelected มี option_id ที่ตรงกับ option ที่เลือกหรือไม่
+      // เช็คว่าใน array optionSelected มี option_id ที่ตรงกับ option ที่เลือก" หรือไม่
       const condition = this.optionSelected.map(res => res.option_id).includes(option.option_id)
       if (condition) {
         // ถ้ามีให้ลบตัวนั้นออกแล้วแทนที่ด้วย option ที่เลือกล่าสุด
@@ -174,6 +193,7 @@ export default {
         optionSelected: this.optionSelected,
         toppingSelected: this.toppingSelected,
         note: this.note,
+        isTakeaway: this.isTakeaway,
         quantity: this.quantity,
         total: this.total
       }

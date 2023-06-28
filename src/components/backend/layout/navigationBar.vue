@@ -17,8 +17,14 @@
         </v-btn>
       </div>
     </template>
+
+    <v-list-item class="justify-center pr-0">
+      <v-list-item-avatar size="100">
+        <v-img :src="require('../../../../style/assets/image/logo_invert.png')" />
+      </v-list-item-avatar>
+    </v-list-item>
     <v-list-item>
-      <v-list-item-content>
+      <v-list-item-content class="pt-0">
         <v-list-item-title class="text-center text-h6">
           {{ title }}
         </v-list-item-title>

@@ -31,7 +31,8 @@
                 />
               </v-col>
               <v-col cols="12" sm="6" class="py-1">
-                <v-text-field v-model.number="foodObj.Food_Price" :rules="rules.Food_Price" label="ราคา" placeholder="ระบุราคา เช่น 100 เป็นต้น" />
+                <v-text-field
+                  v-model.number="foodObj.Food_Price" :rules="rules.Food_Price" label="ราคา" placeholder="ระบุราคา เช่น 100 เป็นต้น" />
               </v-col>
               <v-col cols="6" class="mb-4 mb-sm-0 py-1">
                 <v-switch
@@ -123,8 +124,8 @@
             <template #index="{ index }">
               <span>{{ index + 1 }}</span>
             </template>
-            <template #manage="{ item }">
-              <v-btn color="primary" icon @click="spliceOption(item)">
+            <template #manage="{ item, index }">
+              <v-btn color="primary" icon @click="spliceOption(item, index)">
                 <v-icon>mdi-close-circle-outline</v-icon>
               </v-btn>
             </template>
@@ -135,8 +136,8 @@
             <template #index="{ index }">
               <span>{{ index + 1 }}</span>
             </template>
-            <template #manage="{ item }">
-              <v-btn color="primary" icon @click="spliceTopping(item)">
+            <template #manage="{ item, index }">
+              <v-btn color="primary" icon @click="spliceTopping(item, index)">
                 <v-icon>mdi-close-circle-outline</v-icon>
               </v-btn>
             </template>
@@ -148,22 +149,22 @@
               <span>{{ index + 1 }}</span>
             </template>
             <template #ingredientGroup="{ item }">
-              <span>{{ item.ingredientGroup.group }}</span>
+              <span>{{ edit && item && item.ingredientGroup && item.ingredientGroup.group ? item.ingredientGroup.group : item.ingredientGroup }}</span>
             </template>
             <template #cost="{ item }">
               <span>{{ formatNumber(item.cost) }}</span>
             </template>
             <template #ingredientUnit="{ item }">
-              <span>{{ item.ingredientUnit.unit }}</span>
+              <span>{{ edit && item && item.unit ? item.unit : item.ingredientUnit.unit }}</span>
             </template>
             <template #stock="{ item }">
-              <span>{{ formatNumber(item.stock.quantity) }}</span>
+              <span>{{ edit && item && item.quantity ? formatNumber(item.quantity) : formatNumber(item.stock.quantity) }}</span>
             </template>
             <template #amount_used="{ item }">
               <v-text-field v-model.number="item.amount_used" type="number" min="1" :rules="rules.amount_used" hide-spin-buttons />
             </template>
-            <template #manage="{ item }">
-              <v-btn color="primary" icon @click="spliceIngredient(item)">
+            <template #manage="{ item, index }">
+              <v-btn color="primary" icon @click="spliceIngredient(item, index)">
                 <v-icon>mdi-close-circle-outline</v-icon>
               </v-btn>
             </template>
@@ -194,6 +195,7 @@ export default {
   data () {
     return {
       edit: false,
+      saveValidate: false,
       headersOption: [
         { text: 'ลำดับ', align: 'start', value: 'index', width: '5%' },
         { text: 'Option', align: 'start', value: 'Option_Name', width: '15%' },
@@ -240,7 +242,10 @@ export default {
         option: [ value => !!value || 'Required.' ],
         topping: [ value => !!value || 'Required.' ],
         ingredient: [ value => !!value || 'Required.' ],
-        amount_used: [ value => !!value || 'Required.' ]
+        amount_used: [
+          value => !!value || 'Required.'
+          // value => this.ingredientObj.quantity >= value || 'เกินกำหนด.'
+        ]
       },
 
       category: [],
@@ -249,8 +254,15 @@ export default {
       ingredient: [],
 
       itemsOption: [],
+      itemsOptionEdited: [],
+      itemsOptionDeleted: [],
       itemsTopping: [],
+      itemsToppingEdited: [],
+      itemsToppingDeleted: [],
       itemsIngredient: [],
+      itemsIngredientOld: [],
+      itemsIngredientEdited: [],
+      itemsIngredientDeleted: [],
       promise: null
     }
   },
@@ -261,9 +273,9 @@ export default {
   },
   mounted () {
     categoryApi.getAll().then((res) => { this.category = res.data })
-    optionApi.getAll().then((res) => { this.option = res.data })
-    toppingApi.getAll().then((res) => { this.topping = res.data })
-    ingredientApi.getAll().then((res) => { this.ingredient = res.data })
+    optionApi.getAll().then((res) => { this.option = res.data.filter(item => item.Option_Detail.length > 0) })
+    toppingApi.getAll().then((res) => { this.topping = res.data.filter(item => item.isActive === 1) })
+    ingredientApi.getAll().then((res) => { this.ingredient = res.data.filter(item => item.stock.quantity > 0) })
   },
   methods: {
     show (data) {
@@ -278,7 +290,16 @@ export default {
           is_recommend: data.is_recommend,
           is_new: data.is_new,
           is_active: data.is_active
-        }
+        },
+
+        this.optionObj = data.Option[data.Option.length - 1]
+        this.toppingObj = data.Topping[data.Topping.length - 1]
+        this.ingredientObj = data.Ingredient[data.Ingredient.length - 1]
+        this.itemsOption = data.Option
+        this.itemsTopping = data.Topping
+        this.itemsIngredient = data.Ingredient
+        this.itemsIngredientOld = [ ...data.Ingredient ]
+
         this.$nextTick(() => {
           this.$refs.upload.imgForEdit(this.foodObj.Food_Image)
         })
@@ -294,36 +315,60 @@ export default {
     },
     pushOptionToItemsOption () {
       const itemOptionObj = { ...this.optionObj }
-      const checkDuplicate = this.itemsOption.some((item) => item.id === itemOptionObj.id)
-      if (!checkDuplicate) {
-        this.itemsOption.push(itemOptionObj)
+      const checkDuplicateOld = this.itemsOption.some((item) => item.id === itemOptionObj.id)
+      if (!checkDuplicateOld) { this.itemsOption.push(itemOptionObj) }
+      if (this.edit) {
+        const checkDuplicateNew = this.itemsOptionEdited.some((item) => item.id === itemOptionObj.id)
+        if (!checkDuplicateOld && !checkDuplicateNew) {
+          this.itemsOptionEdited.push(itemOptionObj)
+        }
       }
     },
     pushToppingToItemsTopping () {
       const itemToppingObj = { ...this.toppingObj }
-      const checkDuplicate = this.itemsTopping.some((item) => item.id === itemToppingObj.id)
-      if (!checkDuplicate) {
-        this.itemsTopping.push(itemToppingObj)
+      const checkDuplicateOld = this.itemsTopping.some((item) => item.id === itemToppingObj.id)
+      if (!checkDuplicateOld) { this.itemsTopping.push(itemToppingObj) }
+      if (this.edit) {
+        const checkDuplicateNew = this.itemsToppingEdited.some((item) => item.id === itemToppingObj.id)
+        if (!checkDuplicateOld && !checkDuplicateNew) {
+          this.itemsToppingEdited.push(itemToppingObj)
+        }
       }
     },
     pushIngredientToItemIngredient () {
       const itemIngredientObj = { ...this.ingredientObj }
-      const checkDuplicate = this.itemsIngredient.some((item) => item.id === itemIngredientObj.id)
-      if (!checkDuplicate) {
-        this.itemsIngredient.push(itemIngredientObj)
+      const checkDuplicateOld = this.itemsIngredient.some((item) => (item.food_id ? item.ingredient_id : item.id) === (itemIngredientObj.food_id ? itemIngredientObj.ingredient_id : itemIngredientObj.id))
+      if (!checkDuplicateOld) { this.itemsIngredient.push(itemIngredientObj) }
+      if (this.edit) {
+        const checkDuplicateNew = this.itemsIngredientEdited.some((item) => item.id === itemIngredientObj.id)
+        if (!checkDuplicateOld && !checkDuplicateNew) {
+          this.itemsIngredientEdited.push(itemIngredientObj)
+        }
       }
     },
-    spliceOption (option) {
-      const optionIndex = this.itemsOption.findIndex(item => item.id === option.id)
-      this.itemsOption.splice(optionIndex, 1)
+    spliceOption (option, index) {
+      if (!this.edit) {
+        this.itemsOption.splice(index, 1)
+      } else {
+        this.itemsOptionDeleted.push(option)
+        this.itemsOption.splice(index, 1)
+      }
     },
-    spliceTopping (topping) {
-      const toppingIndex = this.itemsTopping.findIndex(item => item.id === topping.id)
-      this.itemsTopping.splice(toppingIndex, 1)
+    spliceTopping (topping, index) {
+      if (!this.edit) {
+        this.itemsTopping.splice(index, 1)
+      } else {
+        this.itemsToppingDeleted.push(topping)
+        this.itemsTopping.splice(index, 1)
+      }
     },
-    spliceIngredient (ingredient) {
-      const ingredientIndex = this.itemsIngredient.findIndex(item => item.id === ingredient.id)
-      this.itemsIngredient.splice(ingredientIndex, 1)
+    spliceIngredient (ingredient, index) {
+      if (!this.edit) {
+        this.itemsIngredient.splice(index, 1)
+      } else {
+        this.itemsIngredientDeleted.push(ingredient)
+        this.itemsIngredient.splice(index, 1)
+      }
     },
     validate () {
       if (this.$refs.form.validate()) {
@@ -344,8 +389,27 @@ export default {
           ingredient: this.itemsIngredient
         }
 
-        this.promise.resolve(mapData)
-        this.$refs.baseModal.close()
+        const mapDataEdited = {
+          food: FoodFormData,
+          optionEdited: this.itemsOptionEdited,
+          toppingEdited: this.itemsToppingEdited,
+          ingredientEdited: this.itemsIngredientEdited,
+          optionDeleted: this.itemsOptionDeleted,
+          toppingDeleted: this.itemsToppingDeleted,
+          ingredientDeleted: this.itemsIngredientDeleted,
+          ingredientOld: this.itemsIngredientOld
+        }
+
+        // ตรวจสอบเงื่อนว่าหาก amount_used > quantity ให้แจ้ง error
+        const condition1 = mapData.ingredient.filter(item => item.amount_used >= item.quantity).length > 0
+        const condition2 = mapDataEdited.ingredientEdited.filter(item => item.amount_used >= item.stock.quantity).length > 0
+        if (!condition1 && !condition2) {
+          this.promise.resolve(!this.edit ? mapData : mapDataEdited)
+          this.saveValidate = true
+          this.$refs.baseModal.close()
+        } else {
+          this.sweatAlert({ position: this.$vuetify.breakpoint.xs ? 'top' : 'top-end', title: 'จำนวนวัตถุดิบที่ต้องใช้ต่อจาน มากกว่าจำนวนวัตถุดิบใน stock', icon: 'error' })
+        }
       }
     },
     clearModal () {
@@ -357,15 +421,25 @@ export default {
       this.foodObj.is_recommend = 0
       this.foodObj.is_new = 0
       this.foodObj.is_active = 1
-      this.itemsOption = [],
-      this.itemsTopping = [],
-      this.itemsIngredient = [],
-      this.optionObj = null,
-      this.toppingObj = null,
-      this.ingredientObj = null,
+      this.itemsOption = []
+      this.itemsTopping = []
+      this.itemsIngredient = []
+      this.itemsOptionEdited = []
+      this.itemsToppingEdited = []
+      this.itemsIngredientEdited = []
+      this.itemsOptionDeleted = []
+      this.itemsToppingDeleted = []
+      this.itemsIngredientDeleted = []
+      this.optionObj = null
+      this.toppingObj = null
+      this.ingredientObj = null
       this.edit = false
       this.$refs.upload.clearData()
       this.$refs.form.resetValidation()
+      if (!this.saveValidate) {
+        this.$emit('reload')
+      }
+      this.saveValidate = false
     }
   }
 }

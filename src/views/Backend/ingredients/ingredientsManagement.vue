@@ -60,22 +60,25 @@
 </template>
 
 <script>
+// API
 import ingredientApi from '@/api/ingredientApi'
 import stockApi from '@/api/stockApi'
-import ingredientModal from '@/components/backend/modal/ingredient/ingredientModal'
-import confirmModal from '@/components/backend/modal/confirm'
+// Component
+import headerLayout from '@/components/backend/layout/header'
 import flexibleTable from '@/components/backend/table/flexibleTable'
 import pagination from '@/components/backend/pagination'
-import headerLayout from '@/components/backend/layout/header'
+import ingredientModal from '@/components/backend/modal/ingredient/ingredientModal'
+import confirmModal from '@/components/backend/modal/confirm'
+// mixins
 import { mixins } from '@/plugins/mixins'
 export default {
   name: 'IngredientManagementPage',
   components: {
+    headerLayout,
     flexibleTable,
-    ingredientModal,
-    confirmModal,
     pagination,
-    headerLayout
+    ingredientModal,
+    confirmModal
   },
   mixins:[mixins],
   data () {
@@ -154,13 +157,9 @@ export default {
         this.clear()
       }
     },
-    clear () {
-      this.search = null
-      this.$store.commit('setCurrentPage', 1)
-      this.fetchData(this.$store.getters.getCurrentPage)
-    },
     addIngredient () {
       this.$refs.ingredientModal.show().then((resIngredient) => {
+        this.loading = true
         const stock = { quantity: 0 }
         stockApi.create(stock).then((res) => {
           const ingredient = {
@@ -176,38 +175,51 @@ export default {
             } else {
               this.searchDataOnChangePage(this.$store.getters.getCurrentPage)
             }
-          }).catch((error) =>{
+            this.sweatAlert({ position: this.$vuetify.breakpoint.xs ? 'top' : 'top-end', title: 'เพิ่มข้อมูลสำเร็จ' })
+          }).catch((error) => {
             console.log('error', error)
+            this.loading = false
+            this.sweatAlert({ position: this.$vuetify.breakpoint.xs ? 'top' : 'top-end', title: 'มีบางอย่างผิดพลาด' })
           })
-        }).catch((error) =>{
+        }).catch((error) => {
           console.log('error', error)
+          this.loading = false
+          this.sweatAlert({ position: this.$vuetify.breakpoint.xs ? 'top' : 'top-end', title: 'มีบางอย่างผิดพลาด' })
         })
       })
     },
     editIngredient (ingredientObj) {
       this.$refs.ingredientModal.show(ingredientObj).then((res) => {
+        this.loading = true
         ingredientApi.update(ingredientObj.id, res).then(() => {
           if (!this.search) {
             this.fetchData(this.$store.getters.getCurrentPage)
           } else {
             this.searchDataOnChangePage(this.$store.getters.getCurrentPage)
           }
-        }).catch((error) =>{
+          this.sweatAlert({ position: this.$vuetify.breakpoint.xs ? 'top' : 'top-end', title: 'แก้ไขข้อมูลสำเร็จ' })
+        }).catch((error) => {
           console.log('error', error)
+          this.loading = false
+          this.sweatAlert({ position: this.$vuetify.breakpoint.xs ? 'top' : 'top-end', title: 'มีบางอย่างผิดพลาด', icon: 'error' })
         })
       })
     },
     deleteIngredient (ingredientObj) {
-      const text = `คุณต้องการลบ${ingredientObj.ingredient}หรือไม่`
+      const text = `คุณต้องการลบ "${ingredientObj.ingredient}" หรือไม่`
       this.$refs.confirmModal.show(ingredientObj, text).then((res) => {
+        this.loading = true
         ingredientApi.delete(res.id).then(() => {
           if (!this.search) {
             this.fetchData(this.$store.getters.getCurrentPage)
           } else {
             this.searchDataOnChangePage(this.$store.getters.getCurrentPage)
           }
-        }).catch((error) =>{
+          this.sweatAlert({ position: this.$vuetify.breakpoint.xs ? 'top' : 'top-end', title: 'ลบข้อมูลสำเร็จ' })
+        }).catch((error) => {
           console.log('error', error)
+          this.loading = false
+          this.sweatAlert({ position: this.$vuetify.breakpoint.xs ? 'top' : 'top-end', title: 'มีบางอย่างผิดพลาด' })
         })
       })
     },
@@ -218,6 +230,11 @@ export default {
       } else {
         this.searchDataOnChangePage(this.$store.getters.getCurrentPage)
       }
+    },
+    clear () {
+      this.search = null
+      this.$store.commit('setCurrentPage', 1)
+      this.fetchData(this.$store.getters.getCurrentPage)
     }
   }
 }

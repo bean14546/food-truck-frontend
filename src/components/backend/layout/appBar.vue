@@ -6,8 +6,8 @@
   >
     <v-app-bar-nav-icon @click.stop="toggleDrawer" />
     <v-spacer />
-      <v-avatar class="rounded-lg mr-2" tile>
-        <img src="https://cdn.vuetifyjs.com/images/john.jpg" />
+      <v-avatar class="rounded-lg mr-2" tile color="primary">
+        <img :src="require('../../../../style/assets/image/logo_invert.png')" />
       </v-avatar>
     <div>
       <v-toolbar-title>{{ title }}</v-toolbar-title>

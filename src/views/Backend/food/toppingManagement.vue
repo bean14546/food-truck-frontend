@@ -28,6 +28,9 @@
           <template #index="{ index }">
             <span>{{ indexPage($store.getters.getCurrentPage, perPage, index) }}</span>
           </template>
+          <template #isActive="{ item }">
+            <span>{{ statusName(item.isActive) }}</span>
+          </template>
           <template #created_at="{ item }">
             <span>{{ formatDate(item.created_at)  }}</span>
           </template>
@@ -52,12 +55,15 @@
 </template>
 
 <script>
+// API
 import toppingApi from '@/api/toppingApi'
+// Component
 import headerLayout from '@/components/backend/layout/header'
 import flexibleTable from '@/components/backend/table/flexibleTable'
 import pagination from '@/components/backend/pagination'
-import confirmModal from '@/components/backend/modal/confirm'
 import toppingModal from '@/components/backend/modal/food/toppingModal'
+import confirmModal from '@/components/backend/modal/confirm'
+// mixins
 import { mixins } from '@/plugins/mixins'
 export default {
   name: 'ToppingManagementPage',
@@ -65,8 +71,8 @@ export default {
     headerLayout,
     flexibleTable,
     pagination,
-    confirmModal,
-    toppingModal
+    toppingModal,
+    confirmModal
   },
   mixins:[mixins],
   data () {
@@ -147,41 +153,53 @@ export default {
     },
     addTopping () {
       this.$refs.toppingModal.show().then((res) => {
+        this.loading = true
         toppingApi.create(res).then(() => {
           if (!this.search) {
             this.fetchData(this.$store.getters.getCurrentPage)
           } else {
             this.searchDataOnChangePage(this.$store.getters.getCurrentPage)
           }
-        }).catch((error) =>{
+          this.sweatAlert({ position: this.$vuetify.breakpoint.xs ? 'top' : 'top-end', title: 'เพิ่มข้อมูลสำเร็จ' })
+        }).catch((error) => {
           console.log('error', error)
+          this.loading = false
+          this.sweatAlert({ position: this.$vuetify.breakpoint.xs ? 'top' : 'top-end', title: 'มีบางอย่างผิดพลาด' })
         })
       })
     },
     editTopping (toppingObj) {
       this.$refs.toppingModal.show(toppingObj).then((res) => {
+        this.loading = true
         toppingApi.update(toppingObj.id, res).then(() => {
           if (!this.search) {
             this.fetchData(this.$store.getters.getCurrentPage)
           } else {
             this.searchDataOnChangePage(this.$store.getters.getCurrentPage)
           }
-        }).catch((error) =>{
+          this.sweatAlert({ position: this.$vuetify.breakpoint.xs ? 'top' : 'top-end', title: 'แก้ไขข้อมูลสำเร็จ' })
+        }).catch((error) => {
           console.log('error', error)
+          this.loading = false
+          this.sweatAlert({ position: this.$vuetify.breakpoint.xs ? 'top' : 'top-end', title: 'มีบางอย่างผิดพลาด' })
         })
       })
     },
     deleteTopping (toppingObj) {
-      const text = `คุณต้องการลบ${toppingObj.Topping_Name}หรือไม่`
+      const text = `คุณต้องการลบ "${toppingObj.Topping_Name}" หรือไม่`
       this.$refs.confirmModal.show(toppingObj, text).then((res) => {
+        this.loading = true
         toppingApi.delete(res.id).then(() => {
           if (!this.search) {
             this.fetchData(this.$store.getters.getCurrentPage)
           } else {
             this.searchDataOnChangePage(this.$store.getters.getCurrentPage)
           }
-        }).catch((error) =>{
+          this.sweatAlert({ position: this.$vuetify.breakpoint.xs ? 'top' : 'top-end', title: 'ลบข้อมูลสำเร็จ' })
+        }).catch((error) => {
           console.log('error', error)
+          this.loading = false
+          this.sweatAlert({ position: this.$vuetify.breakpoint.xs ? 'top' : 'top-end', title: 'มีบางอย่างผิดพลาด', icon: 'error' })
         })
       })
     },

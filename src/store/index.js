@@ -6,8 +6,8 @@ Vue.use(Vuex)
 export default new Vuex.Store({
   state: {
     cart: [],
-    menu: null,
-    detail: null,
+    menu: {},
+    detail: {},
     currentPage: 1
   },
   mutations: {

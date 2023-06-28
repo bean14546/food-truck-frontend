@@ -5,17 +5,22 @@
         <h1 class="primary--text font-weight-regular mb-4">ตะกร้าสินค้า</h1>
       </div>
     </section>
-
-    <section id="content">
-      <div class="pt-6 px-6 mb-16">
-        <v-row>
-          <v-col v-for="(item, index) in cart" :key="index" cols="12" class="pb-0">
-            <menuCardComponent :food="item.food" :quantity="item.quantity" :total-price="item.total" :to="item.food.id" width="100%" height="100%" name-slug="detail_food_in_cart" :detail-menu="{...item, index: index}" horizontal />
-          </v-col>
-        </v-row>
+    <section v-if="cart && cart.length > 0">
+      <section id="content">
+        <div class="pt-6 px-6 mb-16">
+          <v-row>
+            <v-col v-for="(item, index) in cart" :key="index" cols="12" class="pb-0">
+              <menuCardComponent :food="item.food" :quantity="item.quantity" :total-price="item.total" :to="item.food.id" width="100%" height="100%" name-slug="detail_food_in_cart" :detail-menu="{...item, index: index}" horizontal />
+            </v-col>
+          </v-row>
+        </div>
+      </section>
+    </section>
+    <section v-else>
+      <div class="h-70vh d-flex justify-center align-center">
+        <p class="primary--text text-center mb-0"> ไม่พบอาหารในตะกร้า </p>
       </div>
     </section>
-
     <section id="navigation">
       <v-bottom-navigation class="elevation-0" fixed>
         <div class="px-6 w-100 align-self-center">
@@ -51,11 +56,6 @@ import { mapGetters, mapState } from 'vuex'
 export default {
   name: 'CartPage',
   components: { menuCardComponent },
-  data () {
-    return {
-      takeaway: false
-    }
-  },
   computed: {
     ...mapState([ 'cart' ]),
     ...mapGetters([ 'total' ])
@@ -76,7 +76,7 @@ export default {
           this.createOrder(userJSON.id)
         })
       } else {
-        // เทียบ username ใน localStorage กับ DB ว่ามีและตรงกันหรือไม่ ถ้ามีและตรงกันให้ส่ง userId ให้กับ order
+        // เทียบ username ใน localStorage กับ DB ว่ามีและตรงกัน" หรือไม่ ถ้ามีและตรงกันให้ส่ง userId ให้กับ order
         const user = localStorage.getItem('user')
         const userJSON = JSON.parse(user)
         await userApi.getOne(userJSON.id).then((res) => {
@@ -98,7 +98,7 @@ export default {
           Price: foodInTheCart.total,
           Note: foodInTheCart.note,
           user_id: userId,
-          isTakeaway: this.takeaway
+          isTakeaway: foodInTheCart.isTakeaway
         }
         orderListApi.create(orderList).then((orderListResponse) => {
           foodInTheCart.optionSelected.forEach(optionSelected => {
@@ -116,7 +116,7 @@ export default {
             }
             orderListToppingApi.create(orderListTopping)
           })
-        }).catch((error) =>{
+        }).catch((error) => {
           console.log('error', error)
         })
       })

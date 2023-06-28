@@ -46,27 +46,31 @@
       </v-container>
       <pagination :pageCount="lastPage" @onChangePage="changePage" no-shadow />
     </section>
-    <confirmModal ref="confirmModal" icon="mdi-trash-can" />
     <unitModal ref="unitModal" />
+    <confirmModal ref="confirmModal" icon="mdi-trash-can" />
   </div>
 </template>
 
 <script>
+// API
 import unitApi from '@/api/ingredientUnitApi'
+// Component
 import headerLayout from '@/components/backend/layout/header'
 import flexibleTable from '@/components/backend/table/flexibleTable'
 import pagination from '@/components/backend/pagination'
-import confirmModal from '@/components/backend/modal/confirm'
 import unitModal from '@/components/backend/modal/ingredient/unitModal'
+import confirmModal from '@/components/backend/modal/confirm'
+// mixins
 import { mixins } from '@/plugins/mixins'
+import ingredientApi from '@/api/ingredientApi'
 export default {
   name: 'UnitManagementPage',
   components: {
     headerLayout,
     flexibleTable,
     pagination,
-    confirmModal,
-    unitModal
+    unitModal,
+    confirmModal
   },
   mixins:[mixins],
   data () {
@@ -145,41 +149,67 @@ export default {
     },
     addUnit () {
       this.$refs.unitModal.show().then((res) => {
+        this.loading = true
         unitApi.create(res).then(() => {
           if (!this.search) {
             this.fetchData(this.$store.getters.getCurrentPage)
           } else {
             this.searchDataOnChangePage(this.$store.getters.getCurrentPage)
           }
-        }).catch((error) =>{
+          this.sweatAlert({ position: this.$vuetify.breakpoint.xs ? 'top' : 'top-end', title: 'เพิ่มข้อมูลสำเร็จ' })
+        }).catch((error) => {
           console.log('error', error)
+          this.loading = false
+          this.sweatAlert({ position: this.$vuetify.breakpoint.xs ? 'top' : 'top-end', title: 'มีบางอย่างผิดพลาด', icon: 'error' })
         })
       })
     },
     editUnit (unitObj) {
       this.$refs.unitModal.show(unitObj).then((res) => {
+        this.loading = true
         unitApi.update(unitObj.id, res).then(() => {
           if (!this.search) {
             this.fetchData(this.$store.getters.getCurrentPage)
           } else {
             this.searchDataOnChangePage(this.$store.getters.getCurrentPage)
           }
-        }).catch((error) =>{
+          this.sweatAlert({ position: this.$vuetify.breakpoint.xs ? 'top' : 'top-end', title: 'แก้ไขข้อมูลสำเร็จ' })
+        }).catch((error) => {
           console.log('error', error)
+          this.loading = false
+          this.sweatAlert({ position: this.$vuetify.breakpoint.xs ? 'top' : 'top-end', title: 'มีบางอย่างผิดพลาด', icon: 'error' })
         })
       })
     },
     deleteUnit (unitObj) {
-      const text = `คุณต้องการลบ${unitObj.unit}หรือไม่`
-      this.$refs.confirmModal.show(unitObj, text).then((res) => {
-        unitApi.delete(res.id).then(() => {
-          if (!this.search) {
-            this.fetchData(this.$store.getters.getCurrentPage)
+      const text = `คุณต้องการลบ "${unitObj.unit}" หรือไม่`
+      this.$refs.confirmModal.show(unitObj, text).then((modalResponse) => {
+        this.loading = true
+        ingredientApi.getAll().then((apiResponse) => {
+          // เช็คว่า Unit มีการผูกข้มูลกับ Ingredient หรือไม่ ถ้ามีจะไม่สามารถลบได้
+          const condition = apiResponse.data.filter(item => item.ingredientUnit.ingredient_unit_id === modalResponse.id).length > 0
+          if (!condition) {
+            unitApi.delete(modalResponse.id).then(() => {
+              if (!this.search) {
+                this.fetchData(this.$store.getters.getCurrentPage)
+              } else {
+                this.searchDataOnChangePage(this.$store.getters.getCurrentPage)
+              }
+              this.sweatAlert({ position: this.$vuetify.breakpoint.xs ? 'top' : 'top-end', title: 'ลบข้อมูลสำเร็จ' })
+              this.loading = false
+            }).catch((error) => {
+              console.log('error', error)
+              this.loading = false
+              this.sweatAlert({ position: this.$vuetify.breakpoint.xs ? 'top' : 'top-end', title: 'มีบางอย่างผิดพลาด', icon: 'error' })
+            })
           } else {
-            this.searchDataOnChangePage(this.$store.getters.getCurrentPage)
+            this.sweatAlert({ position: this.$vuetify.breakpoint.xs ? 'top' : 'top-end', title: 'ไม่สามารถลบข้อมูลได้ เนื่องจากหน่วยของวัตถุดิบนี้ผูกกับวัตถุดิบสำหรับทำอาหารอยู่ ดังนั้นกรุณาลบวัตถุดิบสำหรับทำอาหารก่อน', icon: 'error' })
+            this.loading = false
           }
-        }).catch((error) =>{
+        }).catch((error) => {
           console.log('error', error)
+          this.loading = false
+          this.sweatAlert({ position: this.$vuetify.breakpoint.xs ? 'top' : 'top-end', title: 'มีบางอย่างผิดพลาด', icon: 'error' })
         })
       })
     },
@@ -200,6 +230,6 @@ export default {
 }
 </script>
 
-<style>
-
+<style lang="scss" scoped>
+// ต้องมี comment เนื่องจากเชื่อมกับ scss
 </style>

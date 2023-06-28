@@ -6,10 +6,10 @@
     @save="validate"
   >
     <template #body>
-      <v-btn-toggle v-model="timeId" class="d-flex" color="transparent" active-class="primary white--text" mandatory>
+      <v-btn-toggle v-model="time" class="d-flex" color="transparent" active-class="primary white--text" mandatory>
         <v-row v-if="items && items.length > 0">
           <v-col v-for="(item, index) in items" :key="`order-list-${index}`" cols="12" md="6">
-            <v-btn outlined block :value="item.id">{{ item.time }} นาที</v-btn>
+            <v-btn outlined block :value="item">{{ item.time }} นาที</v-btn>
           </v-col>
         </v-row>
       </v-btn-toggle>
@@ -27,7 +27,7 @@ export default {
   data () {
     return {
       items: [],
-      timeId: null,
+      time: null,
       promise: null
     }
   },
@@ -46,8 +46,8 @@ export default {
       })
     },
     validate () {
-      const timeId = this.timeId
-      this.promise.resolve(timeId)
+      const time = this.time
+      this.promise.resolve(time)
       this.$refs.baseModal.close()
     },
     clearModal () {

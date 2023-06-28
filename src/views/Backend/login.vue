@@ -5,8 +5,8 @@
       rounded="xl"
     >
       <v-row no-gutters>
-        <v-col cols="12" sm="6">
-          <v-img class="white--text align-end rounded-tl-xl" :class="$vuetify.breakpoint.smAndUp ? 'rounded-bl-xl' : 'rounded-tr-xl'" src="https://cdn.vuetifyjs.com/images/cards/docks.jpg" :height="$vuetify.breakpoint.smAndUp ? '100%' : ''" />
+        <v-col class="primary rounded-tl-xl" :class="$vuetify.breakpoint.smAndUp ? 'rounded-bl-xl' : 'rounded-tr-xl'" cols="12" sm="6">
+          <v-img class="white--text align-end rounded-tl-xl" :class="$vuetify.breakpoint.smAndUp ? 'rounded-bl-xl' : 'rounded-tr-xl'" :src="require('../../../style/assets/image/logo_invert.png')" :height="$vuetify.breakpoint.smAndUp ? '100%' : ''" />
         </v-col>
         <v-col cols="12" sm="6" class="d-sm-flex align-sm-center">
           <div class="pa-2 w-100">
@@ -30,10 +30,13 @@
 </template>
 
 <script>
+// API
 import authApi from '@/api/authApi'
-import Swal from 'sweetalert2'
+// Mixins
+import { mixins } from '@/plugins/mixins'
 export default {
   name: 'AdminLoginPage',
+  mixins: [mixins],
   data () {
     return {
       valid: true,
@@ -56,21 +59,7 @@ export default {
             const jsonData = JSON.stringify(res)
             const encodeJsonData = btoa(jsonData)
             localStorage.setItem('admin', encodeJsonData)
-            const Toast = Swal.mixin({
-              toast: true,
-              position: 'top-end',
-              showConfirmButton: false,
-              timer: 2000,
-              timerProgressBar: true,
-              didOpen: (toast) => {
-                toast.addEventListener('mouseenter', Swal.stopTimer)
-                toast.addEventListener('mouseleave', Swal.resumeTimer)
-              }
-            })
-            Toast.fire({
-              icon: 'success',
-              title: 'Signed in successfully...'
-            }).then(() => {
+            this.sweatAlert({ title: 'Signed in successfully...' }).then(() => {
               if (localStorage.getItem('admin')) {
                 const adminStorageEncoded = localStorage.getItem('admin')
                 const adminStorageDecoded = adminStorageEncoded ? atob(adminStorageEncoded) : false
@@ -83,27 +72,9 @@ export default {
             })
           })
           .catch((error) => {
-            if (error.response.status) {
-              if (error.response.status == 401) {
-                const Toast = Swal.mixin({
-                  toast: true,
-                  position: 'top-end',
-                  showConfirmButton: false,
-                  timer: 2000,
-                  timerProgressBar: true,
-                  didOpen: (toast) => {
-                    toast.addEventListener('mouseenter', Swal.stopTimer)
-                    toast.addEventListener('mouseleave', Swal.resumeTimer)
-                  }
-                })
-
-                Toast.fire({
-                  icon: 'error',
-                  title: 'Invalid login information!!!'
-                })
-              }
-              this.$refs.form.validate()
-            }
+            console.log('error', error)
+            this.sweatAlert({ title: 'มีบางอย่างผิดพลาด', icon: 'error' })
+            this.$refs.form.validate()
           })
       }
     },

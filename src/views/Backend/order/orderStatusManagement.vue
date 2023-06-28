@@ -52,12 +52,15 @@
 </template>
 
 <script>
+// API
 import orderListStatusApi from '@/api/orderListStatusApi'
+// Component
 import headerLayout from '@/components/backend/layout/header'
 import flexibleTable from '@/components/backend/table/flexibleTable'
 import pagination from '@/components/backend/pagination'
-import confirmModal from '@/components/backend/modal/confirm'
 import orderListStatusModal from '@/components/backend/modal/orderList/orderListStatusModal'
+import confirmModal from '@/components/backend/modal/confirm'
+// mixins
 import { mixins } from '@/plugins/mixins'
 export default {
   name: 'OrderStatusManagementPage',
@@ -65,8 +68,8 @@ export default {
     headerLayout,
     flexibleTable,
     pagination,
-    confirmModal,
-    orderListStatusModal
+    orderListStatusModal,
+    confirmModal
   },
   mixins:[mixins],
   data () {
@@ -145,41 +148,53 @@ export default {
     },
     addOrderStatus () {
       this.$refs.orderListStatusModal.show().then((res) => {
+        this.loading = true
         orderListStatusApi.create(res).then(() => {
           if (!this.search) {
             this.fetchData(this.$store.getters.getCurrentPage)
           } else {
             this.searchDataOnChangePage(this.$store.getters.getCurrentPage)
           }
-        }).catch((error) =>{
+          this.sweatAlert({ position: this.$vuetify.breakpoint.xs ? 'top' : 'top-end', title: 'เพิ่มข้อมูลสำเร็จ' })
+        }).catch((error) => {
           console.log('error', error)
+          this.loading = false
+          this.sweatAlert({ position: this.$vuetify.breakpoint.xs ? 'top' : 'top-end', title: 'มีบางอย่างผิดพลาด', icon: 'error' })
         })
       })
     },
     editOrderListStatus (orderStatusObj) {
       this.$refs.orderListStatusModal.show(orderStatusObj).then((res) => {
+        this.loading = true
         orderListStatusApi.update(orderStatusObj.id, res).then(() => {
           if (!this.search) {
             this.fetchData(this.$store.getters.getCurrentPage)
           } else {
             this.searchDataOnChangePage(this.$store.getters.getCurrentPage)
           }
-        }).catch((error) =>{
+          this.sweatAlert({ position: this.$vuetify.breakpoint.xs ? 'top' : 'top-end', title: 'แก้ไขข้อมูลสำเร็จ' })
+        }).catch((error) => {
           console.log('error', error)
+          this.loading = false
+          this.sweatAlert({ position: this.$vuetify.breakpoint.xs ? 'top' : 'top-end', title: 'มีบางอย่างผิดพลาด', icon: 'error' })
         })
       })
     },
-    deleteOrderListStatus (orderStatusObj) {
-      const text = `คุณต้องการลบ${orderStatusObj.Order_Status_Name}หรือไม่`
-      this.$refs.confirmModal.show(orderStatusObj, text).then((res) => {
+    deleteOrderListStatus (orderListStatusObj) {
+      const text = `คุณต้องการลบ "${orderListStatusObj.Order_List_Status_Name}" หรือไม่`
+      this.$refs.confirmModal.show(orderListStatusObj, text).then((res) => {
+        this.loading = true
         orderListStatusApi.delete(res.id).then(() => {
           if (!this.search) {
             this.fetchData(this.$store.getters.getCurrentPage)
           } else {
             this.searchDataOnChangePage(this.$store.getters.getCurrentPage)
           }
-        }).catch((error) =>{
+          this.sweatAlert({ position: this.$vuetify.breakpoint.xs ? 'top' : 'top-end', title: 'ลบข้อมูลสำเร็จ' })
+        }).catch((error) => {
           console.log('error', error)
+          this.loading = false
+          this.sweatAlert({ position: this.$vuetify.breakpoint.xs ? 'top' : 'top-end', title: 'มีบางอย่างผิดพลาด', icon: 'error' })
         })
       })
     },

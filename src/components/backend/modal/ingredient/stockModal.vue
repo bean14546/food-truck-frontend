@@ -145,16 +145,16 @@ export default {
     show (data) {
       if (data) {
         this.edit = true
-        const itemForSave = data.ingredient.map((item) => {
+        const itemForSave = data.map((item) => {
           const obj = {}
-          obj.cost = item.cost
-          obj.ingredient = item.ingredient
-          obj.ingredient_id = item.ingredient_id
-          obj.quantity = item.quantity
-          obj.unit = item.unit
-          obj.total = Number(item.cost) * Number(item.quantity)
-          obj.stock_id = item.stock_id
-          obj.date = item.date
+          obj.cost = item.ingredient.cost
+          obj.ingredient = item.ingredient.ingredient
+          obj.ingredient_id = item.ingredient.ingredient_id
+          obj.quantity = item.log_quantity
+          obj.unit = item.ingredient.unit
+          obj.total = Number(item.ingredient.cost) * Number(item.log_quantity)
+          obj.stock_id = item.ingredient.stock_id
+          obj.date = item.ingredient.date
           return obj
         })
         this.itemsForSave = itemForSave

@@ -56,9 +56,21 @@
           <p>ราคารวม</p>
           <p class="darkGrey--text">{{ items.Price }}</p>
         </div>
+        <div class="d-flex justify-space-between">
+          <p>ห่อกลับบ้าน</p>
+          <p class="darkGrey--text">{{ items.isTakeaway ? 'ใช่' : 'ไม่ใช่' }}</p>
+        </div>
         <div v-if="items && items.Chef_Note" class="d-flex justify-space-between">
           <p>โน๊ตจากร้านค้า</p>
           <p class="darkGrey--text">{{ items.Chef_Note }}</p>
+        </div>
+        <div v-if="items && items.Chef_Note" class="d-flex justify-space-between">
+          <p>เวลาทำอาหาร</p>
+          <p class="darkGrey--text">{{ items.Chef_Note }}</p>
+        </div>
+        <div v-if="items && items.order_list_status_id === 2" class="d-flex justify-space-between">
+          <p>เวลาทำอาหาร</p>
+          <p class="darkGrey--text">{{ convertToTime }}</p>
         </div>
       </v-card-text>
     </v-card>
@@ -66,6 +78,8 @@
 </template>
 
 <script>
+import { doc, onSnapshot } from 'firebase/firestore'
+import { db } from '@/firebase/firebaseConfig'
 export default {
   name: 'DetailCardComponent',
   props: {
@@ -91,6 +105,49 @@ export default {
     image: {
       type: String,
       default: null
+    }
+  },
+  data () {
+    return {
+      countdown: {}
+    }
+  },
+  computed: {
+    convertToTime () {
+      const seconds = Math.floor(this.countdown.remaining_time / 1000)
+      const minutes = Math.floor(seconds / 60)
+      const secondsRemaining = seconds % 60
+
+      const minutesString = minutes.toString().padStart(2, '0')
+      const secondsString = secondsRemaining.toString().padStart(2, '0')
+
+      return `${minutesString}:${secondsString}`
+    }
+  },
+  async mounted () {
+    await this.getCountdownTimer()
+  },
+  methods: {
+    async getCountdownTimer () {
+      this.$nextTick(async () => {
+        if (this.items && this.items.id) {
+          const docRef = await doc(db, 'orders', (this.items.id).toString())
+          onSnapshot(docRef, (doc) => {
+            if (doc.data() && this.items) {
+              if (Number(doc.data().order_id) === Number(this.items.id)) {
+                this.countdown = {
+                  order_list_id: doc.data().order_id,
+                  countdown_duration: doc.data().countdown_duration,
+                  remaining_time: doc.data().remaining_time
+                }
+              }
+            }
+          })
+        }
+      })
+    },
+    clearCountdownTimer () {
+      this.countdown = {}
     }
   }
 }

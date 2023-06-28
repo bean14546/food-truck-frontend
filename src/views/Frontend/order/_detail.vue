@@ -1,13 +1,14 @@
 <template>
   <div>
-    <section id="header" class="px-6 pt-6 pb-0">
-      <h1 class="primary--text font-weight-regular">ตรวจสอบรายการอาหาร</h1>
-    </section>
-    <section id="body" class="mb-16 px-6 pt-6 pb-6">
-      <detailCardComponent :items="item" />
-    </section>
-    <section id="navigation" v-if="item && item.order_list_status_id !== 3">
-      <v-bottom-navigation class="d-flex flex-column elevation-0 px-5" color="primary" fixed >
+    <section v-if="item && item.id">
+      <section id="header" class="px-6 pt-6 pb-0">
+        <h1 class="primary--text font-weight-regular">ตรวจสอบรายการอาหาร</h1>
+      </section>
+      <section id="body" class="mb-16 px-6 pt-6 pb-6">
+        <detailCardComponent :items="item" />
+      </section>
+      <section id="navigation" v-if="item && item.order_list_status_id === 1">
+        <v-bottom-navigation class="d-flex flex-column elevation-0 px-5" color="primary" fixed >
           <div class="d-flex justify-center align-center w-100">
             <v-btn
               color="primary"
@@ -18,7 +19,13 @@
               <span class="white--text text-subtitle-1 font-weight-regular"> ยกเลิก </span>
             </v-btn>
           </div>
-      </v-bottom-navigation>
+        </v-bottom-navigation>
+      </section>
+    </section>
+    <section v-else>
+      <div class="h-100vh d-flex justify-center align-center">
+        <p class="primary--text text-center mb-0"> ไม่พบข้อมูล </p>
+      </div>
     </section>
   </div>
 </template>

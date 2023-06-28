@@ -28,6 +28,9 @@
           <template #index="{ index }">
             <span>{{ indexPage($store.getters.getCurrentPage, perPage, index) }}</span>
           </template>
+          <template #isActive="{ item }">
+            <span>{{ statusName(item.isActive) }}</span>
+          </template>
           <template #created_at="{ item }">
             <span>{{ formatDate(item.created_at)  }}</span>
           </template>
@@ -46,18 +49,21 @@
       </v-container>
       <pagination :pageCount="lastPage" @onChangePage="changePage" no-shadow />
     </section>
-    <optionDetailModal ref="optionModal" />
+    <optionDetailModal ref="optionDetailModal" />
     <confirmModal ref="confirmModal" icon="mdi-trash-can" />
   </div>
 </template>
 
 <script>
+// API
 import optionDetailApi from '@/api/optionDetailApi'
+// Component
 import headerLayout from '@/components/backend/layout/header'
 import flexibleTable from '@/components/backend/table/flexibleTable'
 import pagination from '@/components/backend/pagination'
-import confirmModal from '@/components/backend/modal/confirm'
 import optionDetailModal from '@/components/backend/modal/food/options/optionDetailModal'
+import confirmModal from '@/components/backend/modal/confirm'
+// mixins
 import { mixins } from '@/plugins/mixins'
 export default {
   name: 'OptionDetailManagementPage',
@@ -65,8 +71,8 @@ export default {
     headerLayout,
     flexibleTable,
     pagination,
-    confirmModal,
-    optionDetailModal
+    optionDetailModal,
+    confirmModal
   },
   mixins:[mixins],
   data () {
@@ -147,42 +153,54 @@ export default {
       }
     },
     addOptionDetail () {
-      this.$refs.optionModal.show().then((res) => {
+      this.$refs.optionDetailModal.show().then((res) => {
+        this.loading = true
         optionDetailApi.create(res).then(() => {
           if (!this.search) {
             this.fetchData(this.$store.getters.getCurrentPage)
           } else {
             this.searchDataOnChangePage(this.$store.getters.getCurrentPage)
           }
-        }).catch((error) =>{
+          this.sweatAlert({ position: this.$vuetify.breakpoint.xs ? 'top' : 'top-end', title: 'เพิ่มข้อมูลสำเร็จ' })
+        }).catch((error) => {
           console.log('error', error)
+          this.loading = false
+          this.sweatAlert({ position: this.$vuetify.breakpoint.xs ? 'top' : 'top-end', title: 'มีบางอย่างผิดพลาด', icon: 'error' })
         })
       })
     },
     editOptionDetail (optionDetailObj) {
-      this.$refs.optionModal.show(optionDetailObj).then((res) => {
+      this.$refs.optionDetailModal.show(optionDetailObj).then((res) => {
+        this.loading = true
         optionDetailApi.update(optionDetailObj.id, res).then(() => {
           if (!this.search) {
             this.fetchData(this.$store.getters.getCurrentPage)
           } else {
             this.searchDataOnChangePage(this.$store.getters.getCurrentPage)
           }
-        }).catch((error) =>{
+          this.sweatAlert({ position: this.$vuetify.breakpoint.xs ? 'top' : 'top-end', title: 'แก้ไขข้อมูลสำเร็จ' })
+        }).catch((error) => {
           console.log('error', error)
+          this.loading = false
+          this.sweatAlert({ position: this.$vuetify.breakpoint.xs ? 'top' : 'top-end', title: 'มีบางอย่างผิดพลาด', icon: 'error' })
         })
       })
     },
     deleteOptionDetail (optionDetailObj) {
-      const text = `คุณต้องการลบ${optionDetailObj.Option_Name}หรือไม่`
+      const text = `คุณต้องการลบ "${optionDetailObj.Option_Detail_Name}" หรือไม่`
       this.$refs.confirmModal.show(optionDetailObj, text).then((res) => {
+        this.loading = true
         optionDetailApi.delete(res.id).then(() => {
           if (!this.search) {
             this.fetchData(this.$store.getters.getCurrentPage)
           } else {
             this.searchDataOnChangePage(this.$store.getters.getCurrentPage)
           }
-        }).catch((error) =>{
+          this.sweatAlert({ position: this.$vuetify.breakpoint.xs ? 'top' : 'top-end', title: 'ลบข้อมูลสำเร็จ' })
+        }).catch((error) => {
           console.log('error', error)
+          this.loading = false
+          this.sweatAlert({ position: this.$vuetify.breakpoint.xs ? 'top' : 'top-end', title: 'มีบางอย่างผิดพลาด', icon: 'error' })
         })
       })
     },
