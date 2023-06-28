@@ -100,9 +100,7 @@ export default {
   },
   async mounted () {
     await this.fetchData()
-    await setTimeout(()=>{
-      this.scrollToCategory()
-    }, 200)
+    await this.scrollToCategory(Number(this.$route.hash.split('')[1]))
   },
   methods: {
     async fetchData () {
@@ -118,15 +116,15 @@ export default {
     goToSlug (id) {
       this.$router.push(`/food-truck/_food_slug/${id}`)
     },
-    scrollToCategory (category) {
-      if (category === 0) {
+    scrollToCategory (id) {
+      if (id === 0) {
         this.$vuetify.goTo(0)
-      } else if (category > 0) {
-        this.$refs[`category-#${category}`] && this.$refs[`category-#${category}`].length > 0 ? this.$refs[`category-#${category}`][0].scrollIntoView({ behavior: 'smooth' }) : false
+      } else if (id > 0) {
+        this.$refs[`category-#${id}`][0].scrollIntoView({ behavior: 'smooth' })
         this.$router.replace(this.$router.currentRoute.path).catch(()=>{})
       } else {
         const element = this.$route.hash
-        this.$refs[`category-#${element}`] && this.$refs[`category-#${element}`].length > 0 ? this.$refs[`category-#${element}`][0].scrollIntoView({ behavior: 'smooth' }) : false
+        this.$refs[`category-#${element}`][0].scrollIntoView({ behavior: 'smooth' })
       }
     }
   }
