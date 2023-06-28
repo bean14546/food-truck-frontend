@@ -100,7 +100,12 @@ export default {
   },
   async mounted () {
     await this.fetchData()
-    await this.scrollToCategory(Number(this.$route.hash.split('')[1]))
+    const hash = this.$route.hash.split('')
+    if (hash.length > 0) {
+      await this.scrollToCategory(Number(hash[1]))
+    } else {
+      await this.scrollToCategory(0)
+    }
   },
   methods: {
     async fetchData () {
