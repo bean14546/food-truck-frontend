@@ -79,14 +79,17 @@ export default {
       return []
     }
   },
-  async mounted () {
-    await this.fetchData()
+  mounted () {
+    this.fetchData()
   },
   methods: {
     async fetchData () {
       this.loading = true
       await orderListApi.getAll().then((res) => {
-        this.orderLists = res.data
+        const userStorage = localStorage.getItem('user')
+        const userStorageJSON = JSON.parse(userStorage)
+        const userID = userStorageJSON.id
+        this.orderLists = res.data.filter(item => item.user.id === userID)
       })
       await orderListStatusApi.getAll().then((res) => {
         this.orderListStatus = res.data

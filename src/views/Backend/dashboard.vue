@@ -144,9 +144,13 @@ export default {
         sales = result
 
         // อาหารที่ถูกซื้อเยอะที่สุด 3 อันดับแรก
-        const foodName = res.data.filter(item => this.formatDate(item.created_at) === this.date).map(item => item.Food.Food_Name)
-        this.dataDoughnutChart.labels = this.ranking(foodName, 3).topDataDuplicates
-        this.dataDoughnutChart.datasets[0].data = this.ranking(foodName, 3).topNumberDuplicates
+        const foodFilter = res.data.filter(item => this.formatDate(item.created_at) === this.date && (item.order_list_status_id === 4))
+        const foodCount = foodFilter.reduce((acc, item) => {
+          const repeatedNames = Array(item.Amount).fill(item.Food.Food_Name)
+          return [...acc, ...repeatedNames]
+        }, [])
+        this.dataDoughnutChart.labels = this.ranking(foodCount, 3).topDataDuplicates
+        this.dataDoughnutChart.datasets[0].data = this.ranking(foodCount, 3).topNumberDuplicates
       })
 
       await logDateStockApi.getAll().then((res) => {
