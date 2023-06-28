@@ -122,14 +122,11 @@ export default {
       this.$router.push(`/food-truck/_food_slug/${id}`)
     },
     scrollToCategory (id) {
-      if (id === 0) {
-        this.$vuetify.goTo(0)
-      } else if (id > 0) {
+      if (id > 0) {
         this.$refs[`category-#${id}`][0].scrollIntoView({ behavior: 'smooth' })
         this.$router.replace(this.$router.currentRoute.path).catch(()=>{})
       } else {
-        const element = this.$route.hash
-        this.$refs[`category-#${element}`][0].scrollIntoView({ behavior: 'smooth' })
+        this.$vuetify.goTo(0)
       }
     }
   }
