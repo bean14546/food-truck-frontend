@@ -1,7 +1,7 @@
 <template>
   <v-dialog v-model="dialog" ref="dialog" width="290px" persistent :return-value.sync="date">
     <template v-slot:activator="{ on, attrs }">
-      <v-text-field v-model="date" class="filter-input" color="primary" height="52" prepend-inner-icon="mdi-calendar" label="PICKER IN DIALOG" hide-details solo readonly v-bind="attrs" v-on="on" />
+      <v-text-field v-model="date" class="filter-input rounded-xl" color="primary" height="52" prepend-inner-icon="mdi-calendar" label="PICKER IN DIALOG" hide-details solo readonly v-bind="attrs" v-on="on" />
     </template>
     <v-date-picker v-model="date" scrollable :max="dateDefault">
       <v-spacer />

@@ -1,5 +1,5 @@
 <template>
-  <v-card class="pa-6" elevation="15" rounded="lg">
+  <v-card class="pa-6" elevation="15" rounded="xl">
     <v-card-text v-if="!loading" class="font-weight-medium text-h6 d-flex pa-2">
       <p class="mb-0"> {{ item.name }} </p>
       <v-spacer />
@@ -8,7 +8,7 @@
         <span>{{ item.pronoun }}</span>
       </p>
     </v-card-text>
-    <v-skeleton-loader v-else type="text" />
+    <v-skeleton-loader v-else type="list-item" />
   </v-card>
 </template>
 
