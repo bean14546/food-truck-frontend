@@ -10,7 +10,7 @@
 
     <section id="navigation">
       <v-bottom-navigation class="d-flex align-center elevation-0 px-6" background-color="transparent" fixed>
-        <v-btn class="rounded-lg" color="primary" block dense @click="start">
+        <v-btn class="rounded-lg" color="primary" height="36px" block dense @click="start">
           <span class="white--text font-weight-light">
             เข้าใชงานที่นี่
           </span>

@@ -23,7 +23,7 @@
     </section>
     <section id="navigation">
       <v-bottom-navigation class="d-flex align-center elevation-0 px-6" fixed>
-        <v-btn class="rounded-lg" color="primary" block :disabled="!total" @click="orderNow">
+        <v-btn class="rounded-lg" color="primary" height="36px" block :disabled="!total" @click="orderNow">
           <p class="mb-0">
             <span v-if="total" class="white--text font-weight-light">
               สั่งเลย
