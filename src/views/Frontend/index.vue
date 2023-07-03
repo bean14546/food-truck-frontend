@@ -11,7 +11,7 @@
     <section id="navigation">
       <v-bottom-navigation class="elevation-0" background-color="transparent" fixed>
         <div class="align-self-center px-8 w-100">
-          <v-btn class="rounded-lg" color="primary" block @click="start">
+          <v-btn class="rounded-lg" color="primary" block dense @click="start">
             <span class="white--text font-weight-light">
               เข้าใชงานที่นี่
             </span>
