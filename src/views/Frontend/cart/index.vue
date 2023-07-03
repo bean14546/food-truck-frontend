@@ -22,22 +22,20 @@
       </div>
     </section>
     <section id="navigation">
-      <v-bottom-navigation class="elevation-0" fixed>
-        <div class="px-6 w-100 align-self-center">
-          <v-btn class="rounded-lg" color="primary" block :disabled="!total" @click="orderNow">
-            <p class="mb-0">
-              <span v-if="total" class="white--text font-weight-light">
-                สั่งเลย
-              </span>
-              <span class="white--text font-weight-light">
-                {{ total ? total : 'ยังไม่พบสินค้าในตะกร้า' }}
-              </span>
-              <span v-if="total" class="white--text font-weight-light">
-                บาท
-              </span>
-            </p>
-          </v-btn>
-        </div>
+      <v-bottom-navigation class="d-flex align-center elevation-0 px-6" fixed>
+        <v-btn class="rounded-lg" color="primary" block :disabled="!total" @click="orderNow">
+          <p class="mb-0">
+            <span v-if="total" class="white--text font-weight-light">
+              สั่งเลย
+            </span>
+            <span class="white--text font-weight-light">
+              {{ total ? total : 'ยังไม่พบสินค้าในตะกร้า' }}
+            </span>
+            <span v-if="total" class="white--text font-weight-light">
+              บาท
+            </span>
+          </p>
+        </v-btn>
       </v-bottom-navigation>
     </section>
   </div>
