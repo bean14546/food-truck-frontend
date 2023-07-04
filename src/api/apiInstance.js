@@ -1,8 +1,8 @@
 import axios from 'axios'
 
 const Instance = axios.create({
-  // baseURL: process.env.VUE_APP_URL_API,
-  baseURL: 'https://food-truck.azurewebsites.net/api/',
+  baseURL: process.env.VUE_APP_URL_API,
+  // baseURL: 'https://food-truck.azurewebsites.net/api/',
   withCredentials: true,
   // headers คือ ข้อมูลเพิ่มเติมที่เราต้องการส่งไปพร้อมกับ Request Header
   headers: {

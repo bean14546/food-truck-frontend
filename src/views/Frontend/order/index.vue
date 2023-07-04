@@ -87,8 +87,8 @@ export default {
       this.loading = true
       await orderListApi.getAll().then((res) => {
         const userStorage = localStorage.getItem('user')
-        const userStorageJSON = JSON.parse(userStorage)
-        const userID = userStorageJSON.id
+        const userStorageJSON = userStorage ? JSON.parse(userStorage) : false
+        const userID = userStorageJSON ? userStorageJSON.id : false
         this.orderLists = res.data.filter(item => item.user.id === userID)
       })
       await orderListStatusApi.getAll().then((res) => {
