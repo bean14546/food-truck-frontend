@@ -133,6 +133,7 @@ export default {
         this.category = res.data
         this.loading = false
       })
+      this.$forceUpdate()
     },
     goToSlug (id) {
       this.$router.push(`/food-truck/_food_slug/${id}`)

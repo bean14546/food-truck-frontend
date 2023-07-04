@@ -1,14 +1,13 @@
 <template>
   <div>
-    <v-card
-      class="d-flex justify-center align-center rounded-pill elevation-0"
+    <v-avatar
+      class="elevation-0"
       :color="color"
-      width="80px"
-      height="80px"
+      size="80"
       @click="goToCategory(category.id)"
     >
       <v-img :src="category.Category_Image" />
-    </v-card>
+    </v-avatar>
   </div>
 </template>
 
