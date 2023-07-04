@@ -59,7 +59,7 @@ export default {
             const jsonData = JSON.stringify(res)
             const encodeJsonData = btoa(jsonData)
             localStorage.setItem('admin', encodeJsonData)
-            this.sweatAlert({ title: 'Signed in successfully...' }).then(() => {
+            this.sweatAlert({ position: this.$vuetify.breakpoint.xs ? 'top' : 'top-end', title: 'Signed in successfully...' }).then(() => {
               if (localStorage.getItem('admin')) {
                 const adminStorageEncoded = localStorage.getItem('admin')
                 const adminStorageDecoded = adminStorageEncoded ? atob(adminStorageEncoded) : false
@@ -73,7 +73,7 @@ export default {
           })
           .catch((error) => {
             console.log('error', error)
-            this.sweatAlert({ title: 'มีบางอย่างผิดพลาด', icon: 'error' })
+            this.sweatAlert({ position: this.$vuetify.breakpoint.xs ? 'top' : 'top-end', title: 'มีบางอย่างผิดพลาด', icon: 'error' })
             this.$refs.form.validate()
           })
       }

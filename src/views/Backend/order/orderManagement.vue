@@ -3,7 +3,7 @@
     <headerLayout title="จัดการ Order" name-btn="เพิ่ม Order" none-btn />
     <section id="content">
       <v-container class="white rounded-lg pa-6">
-        <v-tabs v-model="tab" class="mb-4">
+        <v-tabs v-model="tab" class="mb-4" prev-icon>
           <template v-for="(status, index) in listStatusItems">
             <v-tab :href="`#${index}`" :key="`order-status-${index}`" @click="selectTab(index)">
               {{ status.Order_List_Status_Name }}
