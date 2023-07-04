@@ -44,9 +44,7 @@
       </section>
 
       <section id="recommend" class="pt-6 pb-0 pl-6">
-        <sliderComponent
-          :items="recommendFood"
-        >
+        <sliderComponent :items="recommendFood">
           <template #item="{ item }">
             <menuCardComponent class="mr-4" :food="item" :to="item.id" color="#F53B50" name-slug="food" recommend />
           </template>
@@ -54,9 +52,7 @@
       </section>
 
       <section id="category" class="pt-6 pb-0 pl-6">
-        <sliderComponent
-          :items="category"
-        >
+        <sliderComponent :items="category">
           <template #item="{ item }">
             <categoryCardComponent class="mr-4" :category="item" />
           </template>
@@ -64,19 +60,12 @@
       </section>
 
       <section id="new-arrival" class="secondary mt-6 mb-14">
-        <div class="py-6 pl-6">
-          <h3 class="font-weight-regular mb-0">
-            หากคุณกำลังมองหา
-            <span class="primary--text font-weight-bold">
-              เมนูใหม่!
-            </span>
-          </h3>
-          <p class="grey--text font-weight-regular"> เมนูมาใหม่ แสนอร่อยพร้อมให้คุณมาลิ้มลอง </p>
-          <sliderComponent
-            :items="newFood"
-          >
+        <div class="pt-6 pb-5 pl-6">
+          <h3 class="font-weight-regular mb-0"> หากคุณกำลังมองหา <span class="primary--text font-weight-bold"> เมนูใหม่! </span> </h3>
+          <p class="grey--text font-weight-regular mb-3"> เมนูมาใหม่ แสนอร่อยพร้อมให้คุณมาลิ้มลอง </p>
+          <sliderComponent :items="newFood">
             <template #item="{ item }">
-              <menuCardComponent class="mr-4" :food="item" :to="item.id" name-slug="food" />
+              <menuCardComponent class="mr-4 my-3" :food="item" :to="item.id" name-slug="food" />
             </template>
           </sliderComponent>
         </div>

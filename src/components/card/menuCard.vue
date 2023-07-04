@@ -161,7 +161,7 @@ export default {
   },
   computed: {
     colorVariable () {
-      return `--color: ${this.color}`
+      return `--color: ${this.color ? this.color : 'white'}`
     },
     numberOfLines () {
       return this.recommend ? '--line: 2' : '--line: 1'
