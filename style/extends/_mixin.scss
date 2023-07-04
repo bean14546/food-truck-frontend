@@ -8,5 +8,5 @@
 }
 
 @mixin colorGradient ($color) {
-	background: linear-gradient(109.3deg, rgba(255, 255, 255, 0.2) 0%, rgba(255, 255, 255, 0.180208) 34.28%, rgba(255, 255, 255, 0) 68.56%), $color;
+	background: linear-gradient(109.3deg, rgba(255, 255, 255, 0.2) 0%, rgba(255, 255, 255, 0.180208) 34.28%, rgba(255, 255, 255, 0) 68.56%), $color !important;
 }
