@@ -70,7 +70,8 @@
         </div>
         <div v-if="items && items.order_list_status_id === 2" class="d-flex justify-space-between">
           <p>เวลาทำอาหาร</p>
-          <p class="darkGrey--text">{{ convertToTime }}</p>
+          <progressLoaderComponent v-if="convertToTime === 'NaN:NaN'" />
+          <p v-else class="darkGrey--text">{{ convertToTime }}</p>
         </div>
       </v-card-text>
     </v-card>
@@ -80,8 +81,12 @@
 <script>
 import { doc, onSnapshot } from 'firebase/firestore'
 import { db } from '@/firebase/firebaseConfig'
+import progressLoaderComponent from '@/components/progressLoader.vue'
 export default {
   name: 'DetailCardComponent',
+  components: {
+    progressLoaderComponent
+  },
   props: {
     items: {
       type: Object,

@@ -3,7 +3,7 @@
     <headerLayout title="จัดการ Order" name-btn="เพิ่ม Order" none-btn />
     <section id="content">
       <v-container class="white rounded-lg pa-6">
-        <v-tabs v-model="tab" class="mb-4" prev-icon>
+        <v-tabs v-model="tab" class="mb-4">
           <template v-for="(status, index) in listStatusItems">
             <v-tab :href="`#${index}`" :key="`order-status-${index}`" @click="selectTab(index)">
               {{ status.Order_List_Status_Name }}
@@ -226,9 +226,7 @@ export default {
               const order_list_status_id = 2
               const time_countdown_id = res.id
               const orderListObj = { order_list_status_id, time_countdown_id }
-              orderListApi.update(order_list_id, orderListObj).then(() => {
-                this.clear()
-              })
+              this.updateStatusOrder(order_list_id, orderListObj)
               // firebase countdown
               const orderListId = order_list_id
               const startTime = Date.now()
@@ -242,13 +240,17 @@ export default {
         } else if (item.order_list_status_id === 2) {
           const order_list_status_id = 4
           const orderListObj = { order_list_status_id }
-          orderListApi.update(order_list_id, orderListObj).then(() => {
-            this.clear()
-          }).then(() => {
+          this.updateStatusOrder(order_list_id, orderListObj).then(() => {
             this.sweatAlert({ position: this.$vuetify.breakpoint.xs ? 'top' : 'top-end', title: 'ทำอาหารเสร็จสิ้น' })
           })
         }
       })
+    },
+    updateStatusOrder (id, orderListObj) {
+      orderListApi.update(id, orderListObj).then(() => {
+        this.clear()
+      })
+      return new Promise((resolve) => resolve())
     },
     cancelOrder (item) {
       this.$refs.cancelOrderListModal.show().then((res) => {
@@ -326,9 +328,12 @@ export default {
             // อัปเดตค่าเวลาในเอกสาร
             updateDoc(countdownRef, { remaining_time: remainingTime })
 
-            // หยุด interval เมื่อ countdown เสร็จสิ้น
+            // หยุด interval และ update status เมื่อ countdown เสร็จสิ้น
             if (remainingTime <= 0) {
               clearInterval(intervalId)
+              this.updateStatusOrder(orderListId, { order_list_status_id: 4 }).then(() => {
+                this.sweatAlert({ position: this.$vuetify.breakpoint.xs ? 'top' : 'top-end', title: 'ทำอาหารเสร็จสิ้น' })
+              })
             }
           }
         })
@@ -343,7 +348,7 @@ export default {
 .v-tabs:not(.v-tabs--vertical):not(.v-tabs--right) >
 .v-slide-group--is-overflowing.v-tabs-bar--is-mobile:not(.v-slide-group--has-affixes) >
 .v-slide-group__prev {
-  display: none;
-  visibility: hidden;
+  display: none !important;
+  visibility: hidden !important;
 }
 </style>

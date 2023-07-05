@@ -9,7 +9,7 @@
       </section>
       <section id="content">
         <v-tabs v-model="tab" show-arrows background-color="transparent">
-          <v-tab v-for="(item, index) in orderListStatus" :key="`order-status-${index}`">{{ item.Order_List_Status_Name }}</v-tab>
+          <v-tab v-for="(item, index) in orderListStatus" :key="`order-status-${index}`" @click="selectTab(index, tab)">{{ item.Order_List_Status_Name }}</v-tab>
             <v-tab-item v-for="n in orderListStatus.length" :key="n">
               <v-row v-if="orderListFilter && orderListFilter.length > 0" class="background w-100 ma-0 pt-4 pb-16">
                 <v-col v-for="item in orderListFilter" :key="`order-list-${item.id}`" class="background px-6 pb-0" cols="12">
@@ -95,6 +95,11 @@ export default {
         this.orderListStatus = res.data
         this.loading = false
       })
+    },
+    selectTab (index, tab) {
+      if (index !== tab) {
+        this.fetchData()
+      }
     }
   }
 }

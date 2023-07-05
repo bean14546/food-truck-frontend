@@ -4,17 +4,12 @@ Vue.use(VueRouter)
 
 function authGuard (to, from, next) {
   try {
-    let authentication = false
     const adminStorageEncoded = localStorage.getItem('admin')
     const adminStorageDecoded = adminStorageEncoded ? atob(adminStorageEncoded) : false
     const adminStorageJSON = adminStorageDecoded ? JSON.parse(adminStorageDecoded) : false
     const token = adminStorageJSON ? adminStorageJSON.token : false
+
     if (token) {
-      authentication = true
-    } else {
-      authentication = false
-    }
-    if (authentication) {
       next()
     } else {
       next({ name: 'login' })
@@ -164,6 +159,11 @@ const routes = [
       }
     ]
   }
+  // เพิ่มเส้นทางด้านล่างนี้
+  // {
+  //   path: '*',
+  //   redirect: '/orderManagement'
+  // }
 ]
 
 const router = new VueRouter({
