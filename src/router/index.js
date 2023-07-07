@@ -159,11 +159,6 @@ const routes = [
       }
     ]
   }
-  // เพิ่มเส้นทางด้านล่างนี้
-  // {
-  //   path: '*',
-  //   redirect: '/orderManagement'
-  // }
 ]
 
 const router = new VueRouter({
