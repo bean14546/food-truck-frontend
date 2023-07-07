@@ -93,11 +93,11 @@
       <section id="navigation">
         <v-bottom-navigation class="elevation-0 px-5" color="primary" fixed>
             <div class="d-flex justify-center align-center mr-3">
-              <v-btn class="rounded-pill" color="primary" height="36px" width="36px" x-small :disabled="this.quantity <= 1" @click="reduce">
+              <v-btn class="rounded-pill" color="primary" min-height="36px" height="36px" max-height="36px" min-width="36px" width="36px" max-width="36px" x-small :disabled="this.quantity <= 1" @click="reduce">
                 <v-icon class="white--text">mdi-minus</v-icon>
               </v-btn>
               <p class="quantity black--text text-subtitle-1 font-weight-regular text-center mr-4 mb-0 ml-4"> {{ quantity }} </p>
-              <v-btn class="rounded-pill" color="primary" height="36px" width="36px" x-small @click="increase">
+              <v-btn class="rounded-pill" color="primary" min-height="36px" height="36px" max-height="36px" min-width="36px" width="36px" max-width="36px" x-small @click="increase">
                 <v-icon class="white--text">mdi-plus</v-icon>
               </v-btn>
             </div>
