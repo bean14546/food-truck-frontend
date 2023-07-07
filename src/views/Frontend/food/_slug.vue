@@ -91,20 +91,23 @@
       </section>
 
       <section id="navigation">
-        <v-bottom-navigation class="elevation-0 px-5" color="primary" fixed >
+        <v-bottom-navigation class="elevation-0 px-5" color="primary" fixed>
             <div class="d-flex justify-center align-center mr-3">
-              <v-btn class="btn-plus" color="primary" height="36px" width="36px" x-small :disabled="this.quantity <= 1" @click="reduce">
+              <v-btn class="rounded-pill" color="primary" height="36px" width="36px" x-small :disabled="this.quantity <= 1" @click="reduce">
                 <v-icon class="white--text">mdi-minus</v-icon>
               </v-btn>
               <p class="quantity black--text text-subtitle-1 font-weight-regular text-center mr-4 mb-0 ml-4"> {{ quantity }} </p>
-              <v-btn class="btn-minus" color="primary" height="36px" width="36px" x-small @click="increase">
+              <v-btn class="rounded-pill" color="primary" height="36px" width="36px" x-small @click="increase">
                 <v-icon class="white--text">mdi-plus</v-icon>
               </v-btn>
             </div>
             <div class="d-flex justify-center align-center w-100 ml-3">
               <v-btn
-                color="primary"
                 class="rounded"
+                min-height="36px"
+                height="36px"
+                max-height="36px"
+                color="primary"
                 block
                 @click="order"
               >
@@ -213,9 +216,9 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-  .btn-plus, .btn-minus  {
-    border-radius: 50% !important;
-  }
+  // .btn-plus, .btn-minus  {
+  //   border-radius: 50% !important;
+  // }
   .quantity {
     width: 20px;
   }
