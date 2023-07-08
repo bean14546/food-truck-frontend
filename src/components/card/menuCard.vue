@@ -11,7 +11,7 @@
       :max-width="!recommend ? (!horizontal ? '250px' : '') : '300px'"
       :min-height="!recommend ? (!horizontal ? '250x' : '') : '160px'"
       :max-height="!recommend ? (!horizontal ? '300px' : '') : '160px'"
-      @click.stop="goToSlug"
+      @click="goToSlug"
     >
       <!-- รูปภาพ -->
       <v-responsive
@@ -168,13 +168,13 @@ export default {
     }
   },
   methods: {
-    async goToSlug () {
-      await this.$router.push(`/food-truck/_${this.nameSlug}_slug/${this.to}`)
+    goToSlug () {
       if (this.editMenu) {
         this.$store.commit('menuEdit', this.editMenu)
       } else if (this.detailMenu) {
         this.$store.commit('detailOrder', this.detailMenu)
       }
+      this.$router.push(`/food-truck/_${this.nameSlug}_slug/${this.to}`)
     },
     imgSrc (image) {
       return require(`../../../style/assets/image/${image}`)
