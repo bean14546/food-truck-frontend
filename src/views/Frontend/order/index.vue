@@ -59,7 +59,6 @@ export default {
       orderLists: [],
       orderListsForFilter: [],
       orderListStatus: [],
-      userID: null,
       loading: true
     }
   },
@@ -91,7 +90,6 @@ export default {
         const userStorage = localStorage.getItem('user')
         const userStorageJSON = userStorage ? JSON.parse(userStorage) : false
         const userID = userStorageJSON ? userStorageJSON.id : false
-        this.userID = userID
         this.orderLists = res.data
         this.orderListsForFilter = res.data.filter(element => element.user.id === userID)
       })
