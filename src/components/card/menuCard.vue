@@ -11,7 +11,7 @@
       :max-width="!recommend ? (!horizontal ? '250px' : '') : '300px'"
       :min-height="!recommend ? (!horizontal ? '250x' : '') : '160px'"
       :max-height="!recommend ? (!horizontal ? '300px' : '') : '160px'"
-      @click="goToSlug"
+      @click.stop="goToSlug"
     >
       <!-- รูปภาพ -->
       <v-responsive
@@ -50,7 +50,7 @@
           <p v-if="!recommend" class="description mb-0" :class="color ? 'white--text' : 'grey--text'">
             {{ food.id ? food.Food_Description : description }}
           </p>
-          <v-btn v-else class="white--text" color="yellow" elevation="0" rounded @click="goToSlug">
+          <v-btn v-else class="white--text" color="yellow" elevation="0" rounded @click.stop="goToSlug">
             ซื้อตอนนี้
           </v-btn>
         </v-card-text>
@@ -168,8 +168,8 @@ export default {
     }
   },
   methods: {
-    goToSlug () {
-      this.$router.push(`/food-truck/_${this.nameSlug}_slug/${this.to}`)
+    async goToSlug () {
+      await this.$router.push(`/food-truck/_${this.nameSlug}_slug/${this.to}`)
       if (this.editMenu) {
         this.$store.commit('menuEdit', this.editMenu)
       } else if (this.detailMenu) {
