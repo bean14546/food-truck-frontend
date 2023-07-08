@@ -36,7 +36,7 @@ import orderListApi from '@/api/orderListApi'
 // mapState
 import { mapState } from 'vuex'
 // Components
-import detailCardComponent from '../../../components/card/detailCard.vue'
+import detailCardComponent from '@/components/card/detailCard.vue'
 export default {
   name: 'DetailOrderPage',
   components: {
