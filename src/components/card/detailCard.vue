@@ -68,6 +68,10 @@
           <p>เวลาทำอาหาร</p>
           <p class="darkGrey--text">{{ items.Chef_Note }}</p>
         </div>
+        <div v-if="items && items.order_list_status_id === 1" class="d-flex justify-space-between">
+          <p>ลำดับคิว</p>
+          <p class="darkGrey--text">เหลืออีกประมาณ {{ items.index + 1 }} คิว</p>
+        </div>
         <div v-if="items && items.order_list_status_id === 2" class="d-flex justify-space-between">
           <p>เวลาทำอาหาร</p>
           <progressLoaderComponent v-if="convertToTime === 'NaN:NaN'" />

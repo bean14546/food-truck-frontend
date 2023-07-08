@@ -12,7 +12,7 @@
           <v-tab v-for="(item, index) in orderListStatus" :key="`order-status-${index}`" @click="selectTab(index, tab)">{{ item.Order_List_Status_Name }}</v-tab>
             <v-tab-item v-for="n in orderListStatus.length" :key="n">
               <v-row v-if="orderListFilter && orderListFilter.length > 0" class="background w-100 ma-0 pt-4 pb-16">
-                <v-col v-for="item in orderListFilter" :key="`order-list-${item.id}`" class="background px-6 pb-0" cols="12">
+                <v-col v-for="item in orderListFilter.filter(element => element.user.id === userID)" :key="`order-list-${item.id}`" class="background px-6 pb-0" cols="12">
                   <menuCardComponent
                     :image="item.Food.Food_Image"
                     :name="item.Food.Food_Name"
@@ -20,7 +20,7 @@
                     :total-price="item.Price"
                     :quantity="item.Amount"
                     :to="item.id"
-                    :detail-menu="item"
+                    :detail-menu="{ ...item, index: queue(orderListFilter, item.id) }"
                     width="100%"
                     height="100%"
                     horizontal
@@ -58,6 +58,7 @@ export default {
       tab: null,
       orderLists: [],
       orderListStatus: [],
+      userID: null,
       loading: true
     }
   },
@@ -85,11 +86,12 @@ export default {
   methods: {
     async fetchData () {
       this.loading = true
+      const userStorage = localStorage.getItem('user')
+      const userStorageJSON = userStorage ? JSON.parse(userStorage) : false
+      const userID = userStorageJSON ? userStorageJSON.id : false
+      this.userID = userID
       await orderListApi.getAll().then((res) => {
-        const userStorage = localStorage.getItem('user')
-        const userStorageJSON = userStorage ? JSON.parse(userStorage) : false
-        const userID = userStorageJSON ? userStorageJSON.id : false
-        this.orderLists = res.data.filter(item => item.user.id === userID)
+        this.orderLists = res.data
       })
       await orderListStatusApi.getAll().then((res) => {
         this.orderListStatus = res.data
@@ -100,6 +102,10 @@ export default {
       if (index !== tab) {
         this.fetchData()
       }
+    },
+    queue (order, itemID) {
+      const queue = order.findIndex(element => element.id === itemID)
+      return queue
     }
   }
 }
