@@ -74,7 +74,7 @@ export default {
         // เทียบ username ใน localStorage กับ DB ว่ามีและตรงกัน" หรือไม่
         const user = localStorage.getItem('user')
         const userJSON = JSON.parse(user)
-        await userApi.search(userJSON.id).then((res) => {
+        await userApi.getOne(userJSON.id).then((res) => {
           // ถ้ามีใน localStorage และ ตรงกับใน database ให้ส่ง userId ให้กับ order
           if (res.data && (res.data.id === userJSON.id)) {
             this.createOrder(res.data.id)
