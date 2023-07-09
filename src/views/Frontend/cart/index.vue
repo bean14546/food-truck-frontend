@@ -68,16 +68,16 @@ export default {
         }).then(() => {
           const user = localStorage.getItem('user')
           const userJSON = JSON.parse(user)
-          this.createOrder(userJSON.username)
+          this.createOrder(userJSON.id)
         })
       } else {
         // เทียบ username ใน localStorage กับ DB ว่ามีและตรงกัน" หรือไม่
         const user = localStorage.getItem('user')
         const userJSON = JSON.parse(user)
-        await userApi.search(userJSON.username).then((res) => {
+        await userApi.search(userJSON.id).then((res) => {
           // ถ้ามีใน localStorage และ ตรงกับใน database ให้ส่ง userId ให้กับ order
-          if (res.data && (res.data.username === userJSON.username)) {
-            this.createOrder(res.data.username)
+          if (res.data && (res.data.id === userJSON.id)) {
+            this.createOrder(res.data.id)
           }
           // ถ้ามีใน localStorage แต่ไม่ตรงกับใน database ให้สร้างข้อมูลลง DB ด้วยข้อมูลที่มีใน localStorage
           else {
