@@ -63,24 +63,21 @@ export default {
       if (!localStorage.getItem('user')) {
         const username = await Math.random().toString(36).slice(2)
         await userApi.create({ username }).then((res) => {
-          const user = {
-            id: res.data.id,
-            username: res.data.username
-          }
+          const user = { username: res.data.username }
           localStorage.setItem('user', JSON.stringify(user))
         }).then(() => {
           const user = localStorage.getItem('user')
           const userJSON = JSON.parse(user)
-          this.createOrder(userJSON.id)
+          this.createOrder(userJSON.username)
         })
       } else {
         // เทียบ username ใน localStorage กับ DB ว่ามีและตรงกัน" หรือไม่
         const user = localStorage.getItem('user')
         const userJSON = JSON.parse(user)
-        await userApi.getOne(userJSON.id).then((res) => {
+        await userApi.search(userJSON.username).then((res) => {
           // ถ้ามีใน localStorage และ ตรงกับใน database ให้ส่ง userId ให้กับ order
-          if (res.data && (res.data.id === userJSON.id)) {
-            this.createOrder(res.data.id)
+          if (res.data && (res.data.username === userJSON.username)) {
+            this.createOrder(res.data.username)
           }
           // ถ้ามีใน localStorage แต่ไม่ตรงกับใน database ให้สร้างข้อมูลลง DB ด้วยข้อมูลที่มีใน localStorage
           else {
@@ -89,13 +86,18 @@ export default {
                 id: res.data.id,
                 username: res.data.username
               }
-              this.createOrder(user.id)
+              localStorage.removeItem('user')
+              localStorage.setItem('user', JSON.stringify(user))
+            }).then(() => {
+              const user = localStorage.getItem('user')
+              const userJSON = JSON.parse(user)
+              this.createOrder(userJSON.id)
             })
           }
         })
       }
     },
-    async createOrder (userId) {
+    async createOrder (user_id) {
       await this.cart.forEach(foodInTheCart => {
         const orderList = {
           food_id: foodInTheCart.food.id,
@@ -103,7 +105,7 @@ export default {
           Amount: foodInTheCart.quantity,
           Price: foodInTheCart.total,
           Note: foodInTheCart.note,
-          user_id: userId,
+          user_id: user_id,
           isTakeaway: foodInTheCart.isTakeaway
         }
         orderListApi.create(orderList).then((orderListResponse) => {
