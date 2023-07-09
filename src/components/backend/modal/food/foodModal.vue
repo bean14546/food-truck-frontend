@@ -149,7 +149,7 @@
               <span>{{ index + 1 }}</span>
             </template>
             <template #ingredientGroup="{ item }">
-              <span>{{ edit && item && item.ingredientGroup && item.ingredientGroup.group ? item.ingredientGroup.group : item.ingredientGroup }}</span>
+              <span>{{ item && item.ingredientGroup && item.ingredientGroup.group ? item.ingredientGroup.group : item.ingredientGroup }}</span>
             </template>
             <template #cost="{ item }">
               <span>{{ formatNumber(item.cost) }}</span>
