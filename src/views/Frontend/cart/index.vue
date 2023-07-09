@@ -63,7 +63,7 @@ export default {
       if (!localStorage.getItem('user')) {
         const username = await Math.random().toString(36).slice(2)
         await userApi.create({ username }).then((res) => {
-          const user = { username: res.data.username }
+          const user = { id: res.data.id, username: res.data.username }
           localStorage.setItem('user', JSON.stringify(user))
         }).then(() => {
           const user = localStorage.getItem('user')
@@ -82,10 +82,7 @@ export default {
           // ถ้ามีใน localStorage แต่ไม่ตรงกับใน database ให้สร้างข้อมูลลง DB ด้วยข้อมูลที่มีใน localStorage
           else {
             userApi.create({ username: userJSON.username }).then((res) => {
-              const user = {
-                id: res.data.id,
-                username: res.data.username
-              }
+              const user = { id: res.data.id, username: res.data.username }
               localStorage.removeItem('user')
               localStorage.setItem('user', JSON.stringify(user))
             }).then(() => {
