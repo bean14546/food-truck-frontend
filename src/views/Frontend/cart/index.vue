@@ -76,7 +76,7 @@ export default {
         const userJSON = JSON.parse(user)
         await userApi.getOne(userJSON.id).then((res) => {
           // ถ้ามีใน localStorage และ ตรงกับใน database ให้ส่ง userId ให้กับ order
-          if (res.data && (res.data.id === userJSON.id)) {
+          if (res.data && (res.data.id === userJSON.id) && (res.data.username === userJSON.username)) {
             this.createOrder(res.data.id)
           }
           // ถ้ามีใน localStorage แต่ไม่ตรงกับใน database ให้สร้างข้อมูลลง DB ด้วยข้อมูลที่มีใน localStorage
