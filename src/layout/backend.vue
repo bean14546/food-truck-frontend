@@ -28,10 +28,6 @@ export default {
               route: 'orderManagement'
             },
             {
-              title: 'จัดการสถานะออเดอร์',
-              route: 'orderStatusManagement'
-            },
-            {
               title: 'จัดการเวลาทำอาหาร',
               route: 'countdownManagement'
             }

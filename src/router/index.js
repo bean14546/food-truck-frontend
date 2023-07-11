@@ -102,11 +102,11 @@ const routes = [
         name: 'orderManagement',
         component: () => import('@/views/Backend/order/orderManagement.vue')
       },
-      {
-        path: 'orderStatusManagement',
-        name: 'orderStatusManagement',
-        component: () => import('@/views/Backend/order/orderStatusManagement.vue')
-      },
+      // {
+      //   path: 'orderStatusManagement',
+      //   name: 'orderStatusManagement',
+      //   component: () => import('@/views/Backend/order/orderStatusManagement.vue')
+      // },
       {
         path: 'countdownManagement',
         name: 'countdownManagement',
