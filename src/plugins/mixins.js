@@ -16,14 +16,14 @@ export const mixins = {
       return formatDate
     },
     formatPrice (value) {
-      const priceDecimal = (value/1).toFixed(2)
+      const priceDecimal = Number(value).toFixed(2)
       const formatPrice = priceDecimal.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',')
       return formatPrice
     },
     formatNumber (value) {
-      const priceDecimal = (value/1)
-      const formatPrice = priceDecimal.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',')
-      return formatPrice
+      const numberDecimal = Number(value)
+      const formatNumber = numberDecimal.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',')
+      return formatNumber
     },
     async sweatAlert ({
       position = 'top-end',
