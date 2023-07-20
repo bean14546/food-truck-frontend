@@ -11,8 +11,6 @@ const Instance = axios.create({
   }
 })
 
-// ติดปัญหา
-
 Instance.interceptors.request.use((config) => {
   let token = null
 
